@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 
 export const HomePage = () => {
 
@@ -56,9 +57,9 @@ export const HomePage = () => {
                             <div className="card h-100">
                               <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR652IUoH2ZkNXQaEpnhs46v-pWMzf0GZD9rg&s" className="card-img-top" alt="..." />
                               <div className="card-body">
-                                <h5 className="card-title">Nama Gedung</h5>
+                                <h5 className="card-title fw-medium">Nama Gedung</h5>
                                 <p className="card-text">00 : 00 - 00 : 00 AM.</p>
-                                <a href="#" className="btn btn-primary">Lihat Detail</a>
+                                <Link to="/detail-fasilitas" className="btn btn-primary">Lihat Detail</Link>
                               </div>
                             </div>
                           </div>
@@ -73,7 +74,7 @@ export const HomePage = () => {
                               <div className="card-body">
                                 <h5 className="card-title">Nama Gedung</h5>
                                 <p className="card-text">00 : 00 - 00 : 00 AM.</p>
-                                <a href="#" className="btn btn-primary">Lihat Detail</a>
+                                <Link to="/detail-fasilitas" className="btn btn-primary">Lihat Detail</Link>
                               </div>
                             </div>
                           </div>
