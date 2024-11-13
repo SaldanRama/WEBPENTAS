@@ -29,7 +29,7 @@ export const NavbarComponents = () => {
                 <a className="nav-link" href="#">Fasilitas</a>
                 </li>
                 <li className="nav-item">
-                <a className="nav-link" href="#">Peminjaman</a>
+                  <Link to="/peminjaman" className="nav-link">Peminjaman</Link>
                 </li>
                 <li className="nav-item">
                 <a className="nav-link" href="#">Kontak</a>

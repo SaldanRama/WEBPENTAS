@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { NavbarComponents } from "./components/NavbarComponents";
 
@@ -7,6 +8,7 @@ import { DetailFasilitas } from "./pages/DetailFasilitas";
 import { Login } from "./pages/Login";
 import NotificationComponents from "./components/NotificationComponents";
 import { DashboardAdmin } from "./pages/DashboardAdmin";
+import { PeminjamanPage } from "./pages/PeminjamanPage";
 
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
         <Route path="/login" Component={Login}/>
         <Route path="/notifications" Component={NotificationComponents}/>
         <Route path="/dashboard/*" Component={DashboardAdmin}/>
+        <Route path="/peminjaman" Component={PeminjamanPage}/>
       </Routes>
 
 
