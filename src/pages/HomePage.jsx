@@ -59,7 +59,7 @@ export const HomePage = () => {
                               <div className="card-body">
                                 <h5 className="card-title fw-medium">Nama Gedung</h5>
                                 <p className="card-text">00 : 00 - 00 : 00 AM.</p>
-                                <Link to="/detail-fasilitas" className="btn btn-primary">Lihat Detail</Link>
+                                <Link to="/detail-fasilitas" className="btn btn-danger">Lihat Detail</Link>
                               </div>
                             </div>
                           </div>
@@ -74,7 +74,7 @@ export const HomePage = () => {
                               <div className="card-body">
                                 <h5 className="card-title">Nama Gedung</h5>
                                 <p className="card-text">00 : 00 - 00 : 00 AM.</p>
-                                <Link to="/detail-fasilitas" className="btn btn-primary">Lihat Detail</Link>
+                                <Link to="/detail-fasilitas" className="btn btn-danger">Lihat Detail</Link>
                               </div>
                             </div>
                           </div>
