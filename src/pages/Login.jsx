@@ -7,8 +7,31 @@ export const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Logika login bisa ditambahkan di sini
-    console.log('Email:', email, 'Password:', password);
+    
+    // Data login sederhana
+    const users = [
+      { email: 'user@example.com', password: 'user123', role: 'user' },
+      { email: 'admin@example.com', password: 'admin123', role: 'admin' }
+    ];
+
+    // Cek kredensial
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+      alert(`Login berhasil sebagai ${user.role}`);
+      // Simpan data user ke localStorage
+      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('isLoggedIn', 'true');
+      
+      // Redirect berdasarkan role
+      if (user.role === 'admin') {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/';
+      }
+    } else {
+      alert('Email atau password salah!');
+    }
   };
 
   return (

@@ -40,7 +40,7 @@ export function DashboardAdmin() {
           className="toggle-sidebar"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          {isSidebarOpen ? '← Tutup' : '→ Buka'}
+          {isSidebarOpen ? '←'  : '→'}
         </button>
 
         <Routes>

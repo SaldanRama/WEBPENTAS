@@ -1,8 +1,9 @@
 import { FaBell } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export const NavbarComponents = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -23,10 +24,20 @@ export const NavbarComponents = () => {
             <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul className="navbar-nav">
                 <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#">Home</a>
+                <Link 
+                  to="/" 
+                  className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
+                >
+                  Home
+                </Link>
                 </li>
                 <li className="nav-item">
-                <a className="nav-link" href="#">Fasilitas</a>
+                <Link 
+                  to="/fasilitas" 
+                  className={`nav-link ${location.pathname === "/fasilitas" ? "active" : ""}`}
+                >
+                  Fasilitas
+                </Link>
                 </li>
                 <li className="nav-item">
                   <Link to="/peminjaman" className="nav-link">Peminjaman</Link>
