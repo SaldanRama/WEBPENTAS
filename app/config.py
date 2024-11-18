@@ -9,6 +9,7 @@ class Config:
     SECRET_KEY = 'dev-key-rahasia'
     
     # Konfigurasi upload
-    UPLOAD_FOLDER = 'uploads'
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'fasilitas')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max 16MB
     ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}

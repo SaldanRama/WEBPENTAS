@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from app.config import Config
+import os
 
 db = SQLAlchemy()
 
@@ -12,7 +13,8 @@ def create_app():
             "origins": "http://localhost:5173",  # URL frontend Anda
             "methods": ["GET", "POST", "PUT", "DELETE"],
             "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
+            "supports_credentials": True,
+            "expose_headers": ["Content-Disposition"]
         }
     })
     app.config.from_object(Config)
@@ -40,5 +42,12 @@ def create_app():
         
         # Create tables
         db.create_all()
+        
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+        
+    @app.route('/uploads/fasilitas/<filename>')
+    def uploaded_file(filename):
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
         
     return app 
