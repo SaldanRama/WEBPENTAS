@@ -10,7 +10,7 @@ export const NavbarComponents = () => {
   };
 
   return (
-    <div className="container-fluid">
+    <div className="">
        <div className="container-fluid">
        <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container">

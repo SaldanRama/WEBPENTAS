@@ -23,12 +23,25 @@ export const DetailFasilitas = () => {
       </div>
 
       {/* Modal Form Peminjaman */}
-      <div className="modal fade" id="formModal" tabIndex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+      <div 
+        className="modal fade" 
+        id="formModal" 
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="formModalLabel" 
+      >
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title fw-medium text-center" id="formModalLabel">Formulir Peminjaman</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 className="modal-title fw-bold" id="formModalLabel">
+                Formulir Peminjaman Fasilitas
+              </h5>
+              <button 
+                type="button" 
+                className="btn-close" 
+                data-bs-dismiss="modal" 
+                aria-label="Close"
+              />
             </div>
             <div className="modal-body">
               <p className="text-center">Ajukan peminjaman fasilitas dengan mengisi formulir berikut secara lengkap</p>

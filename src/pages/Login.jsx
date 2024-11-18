@@ -1,36 +1,44 @@
 import { useState } from 'react';
 import '../disc/css/main.css';
+import axios from 'axios';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Data login sederhana
-    const users = [
-      { email: 'user@example.com', password: 'user123', role: 'user' },
-      { email: 'admin@example.com', password: 'admin123', role: 'admin' }
-    ];
+    try {
+      const response = await axios.post('http://localhost:5000/login', {
+        email,
+        password
+      });
 
-    // Cek kredensial
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-      alert(`Login berhasil sebagai ${user.role}`);
+      const { role } = response.data;
+      
       // Simpan data user ke localStorage
-      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('userRole', role);
       localStorage.setItem('isLoggedIn', 'true');
       
       // Redirect berdasarkan role
-      if (user.role === 'admin') {
-        window.location.href = '/dashboard';
-      } else {
-        window.location.href = '/';
+      switch(role) {
+        case 'admin':
+          window.location.href = '/dashboard';
+          break;
+        case 'dekan':
+          window.location.href = '/dashboard-dekan';
+          break;
+        case 'wakil_dekan':
+          window.location.href = '/dashboard-wadek';
+          break;
+        default:
+          window.location.href = '/';
       }
-    } else {
-      alert('Email atau password salah!');
+      
+    } catch (err) {
+      setError(err.response?.data?.message || 'Email atau password salah!');
     }
   };
 
@@ -74,6 +82,7 @@ export const Login = () => {
             <div className="forgot-password">
               <a href="#">Forgot Password</a>
             </div>
+            {error && <div className="error-message">{error}</div>}
           </form>
         </div>
       </div>
