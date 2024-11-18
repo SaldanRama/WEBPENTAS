@@ -35,23 +35,34 @@ function FacilityManagement() {
   // Handle tambah/edit fasilitas
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting form with data:', formData);
     try {
-      if (editingId) {
-        console.log('Updating facility with ID:', editingId);
-        const response = await axios.put(`http://localhost:5000/fasilitas/${editingId}`, formData);
-        console.log('Update response:', response.data);
-      } else {
-        console.log('Adding new facility');
-        const response = await axios.post('http://localhost:5000/fasilitas', formData);
-        console.log('Add response:', response.data);
+      const formDataToSend = new FormData();
+      formDataToSend.append('nama_fasilitas', formData.nama_fasilitas);
+      formDataToSend.append('kapasitas', formData.kapasitas);
+      
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput.files[0]) {
+        formDataToSend.append('image', fileInput.files[0]);
       }
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      if (editingId) {
+        await axios.put(`http://localhost:5000/fasilitas/${editingId}`, formDataToSend, config);
+      } else {
+        await axios.post('http://localhost:5000/fasilitas', formDataToSend, config);
+      }
+      
       setShowModal(false);
       setFormData({ nama_fasilitas: '', kapasitas: '', image: '' });
       setEditingId(null);
       fetchFacilities();
     } catch (error) {
-      console.error('Error details:', error.response?.data);
+      console.error('Error:', error);
       setError(error.response?.data?.error || 'Gagal menyimpan fasilitas');
     }
   };
@@ -141,12 +152,39 @@ function FacilityManagement() {
                   />
                 </div>
                 <div className="facility-form-group">
-                  <label>URL Gambar:</label>
+                  <label>Gambar Fasilitas:</label>
                   <input
-                    type="text"
-                    value={formData.image}
-                    onChange={(e) => setFormData({...formData, image: e.target.value})}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({...formData, image: reader.result});
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
                   />
+                  {formData.image && (
+                    <div className="image-preview">
+                      <img 
+                        src={formData.image.startsWith('data:') ? formData.image : `http://localhost:5000/uploads/fasilitas/${formData.image}`}
+                        alt="Preview" 
+                        style={{
+                          maxWidth: '200px',
+                          maxHeight: '150px',
+                          marginTop: '10px',
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/placeholder.jpg';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="facility-modal-footer">
                   <button type="submit" className="btn btn-primary">
@@ -186,10 +224,14 @@ function FacilityManagement() {
                   <td>
                     {facility.image && (
                       <img 
-                        src={facility.image} 
+                        src={`http://localhost:5000/uploads/fasilitas/${facility.image}`}
                         alt={facility.nama_fasilitas} 
                         className="facility-image"
                         style={{width: '100px', height: '60px', objectFit: 'cover'}}
+                        onError={(e) => {
+                          e.target.onerror = null; 
+                          e.target.src = 'placeholder.jpg'; // Gambar default jika error
+                        }}
                       />
                     )}
                   </td>
@@ -197,6 +239,7 @@ function FacilityManagement() {
                     <button 
                       className="btn btn-warning"
                       onClick={() => handleEdit(facility)}
+                      style={{ marginRight: '1rem' }}
                     >
                       Edit
                     </button>

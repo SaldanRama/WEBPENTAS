@@ -6,33 +6,34 @@ function DashboardHome() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalFacilities: 0,
-    activeFacilities: 0,
-    inactiveFacilities: 0
+    totalPeminjaman: 0,
+    pendingPeminjaman: 0
   });
 
   const [recentData, setRecentData] = useState({
-    users: [],
+    peminjaman: [],
     facilities: []
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, facilitiesRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/users'),
-          axios.get('http://localhost:3000/api/facilities')
+        const [usersRes, facilitiesRes, peminjamanRes] = await Promise.all([
+          axios.get('http://localhost:5000/users'),
+          axios.get('http://localhost:5000/fasilitas'),
+          axios.get('http://localhost:5000/peminjaman')
         ]);
-
-        setRecentData({
-          users: usersRes.data.slice(-5),  // 5 user terbaru
-          facilities: facilitiesRes.data.slice(-5) // 5 fasilitas terbaru
-        });
 
         setStats({
           totalUsers: usersRes.data.length,
           totalFacilities: facilitiesRes.data.length,
-          activeFacilities: facilitiesRes.data.filter(f => f.status === 'tersedia').length,
-          inactiveFacilities: facilitiesRes.data.filter(f => f.status !== 'tersedia').length
+          totalPeminjaman: peminjamanRes.data.length,
+          pendingPeminjaman: peminjamanRes.data.filter(p => p.status === 'pending').length
+        });
+
+        setRecentData({
+          peminjaman: peminjamanRes.data.slice(-5).reverse(),
+          facilities: facilitiesRes.data.slice(-5).reverse()
         });
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -72,8 +73,8 @@ function DashboardHome() {
             <FaCheckCircle />
           </div>
           <div className="stat-info">
-            <h3>Fasilitas Aktif</h3>
-            <div className="value">{stats.activeFacilities}</div>
+            <h3>Total Peminjaman</h3>
+            <div className="value">{stats.totalPeminjaman}</div>
           </div>
         </div>
 
@@ -82,31 +83,27 @@ function DashboardHome() {
             <FaExclamationCircle />
           </div>
           <div className="stat-info">
-            <h3>Fasilitas Non-Aktif</h3>
-            <div className="value">{stats.inactiveFacilities}</div>
+            <h3>Peminjaman Pending</h3>
+            <div className="value">{stats.pendingPeminjaman}</div>
           </div>
-        </div>
-      </div>
-
-      <div className="dashboard-card">
-        <div className="card-header">
-          <h2>Aktivitas Terbaru</h2>
-          <button className="view-all">Lihat Semua</button>
-        </div>
-        <div className="activity-list">
-          {/* Activity items will be mapped here */}
         </div>
       </div>
 
       <div className="dashboard-grid">
         <div className="dashboard-card">
           <div className="card-header">
-            <h2>Pengguna Terbaru</h2>
+            <h2>Peminjaman Terbaru</h2>
           </div>
-          <div className="user-list">
-            {recentData.users.map(user => (
-              <div key={user.id} className="user-item">
-                <span>{user.name}</span>
+          <div className="peminjaman-list">
+            {recentData.peminjaman.map(pinjam => (
+              <div key={pinjam.id} className="peminjaman-item">
+                <div className="peminjaman-info">
+                  <h4>{pinjam.nama_organisasi}</h4>
+                  <p>Tanggal: {new Date(pinjam.tanggal_mulai).toLocaleDateString()}</p>
+                  <span className={`status-badge ${pinjam.status}`}>
+                    {pinjam.status}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -119,7 +116,10 @@ function DashboardHome() {
           <div className="facility-list">
             {recentData.facilities.map(facility => (
               <div key={facility.id} className="facility-item">
-                <span>{facility.name}</span>
+                <div className="facility-info">
+                  <h4>{facility.nama_fasilitas}</h4>
+                  <p>Kapasitas: {facility.kapasitas} orang</p>
+                </div>
               </div>
             ))}
           </div>

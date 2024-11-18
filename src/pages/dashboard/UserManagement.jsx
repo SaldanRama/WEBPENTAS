@@ -208,7 +208,7 @@ function UserManagement() {
                 <tr key={index}>
                   <td>{user.email}</td>
                   <td>
-                    <span className={`badge ${user.role}`}>
+                    <span className={`badge ${user.role} text-dark`}>
                       {user.role}
                     </span>
                   </td>

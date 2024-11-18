@@ -797,3 +797,105 @@
   padding-top: 1rem;
   border-top: 1px solid #dee2e6;
 }
+
+/* MENAMPILKAN GAMBAR DI KELOLA FASILITAS */
+
+.image-preview {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.facility-image {
+  width: 100px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.facility-form-group input[type="file"] {
+  padding: 0.375rem 0;
+}
+
+
+/* STYLE UNTUK TAMPILAN DASHBOAR HOME ADMIN */
+.dashboard-content {
+  padding: 2rem;
+}
+
+.dashboard-title {
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-icon.users { background: #e3f2fd; color: #1976d2; }
+.stat-icon.facilities { background: #f3e5f5; color: #7b1fa2; }
+.stat-icon.active { background: #e8f5e9; color: #388e3c; }
+.stat-icon.inactive { background: #fbe9e7; color: #d32f2f; }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.peminjaman-item, .facility-item {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.pending { background: #fff3e0; color: #e65100; }
+.status-badge.approved { background: #e8f5e9; color: #2e7d32; }
+.status-badge.rejected { background: #fbe9e7; color: #c62828; }

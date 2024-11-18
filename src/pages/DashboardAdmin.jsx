@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
-import { FaUsers, FaBuilding, FaTachometerAlt, FaBars } from "react-icons/fa";
+import { FaUsers, FaBuilding, FaTachometerAlt,} from "react-icons/fa";
 import UserManagement from "./dashboard/UserManagement";
 import FacilityManagement from "./dashboard/FacilityManagement";
 import DashboardHome from "./dashboard/DashboardHome";
@@ -11,7 +11,6 @@ export function DashboardAdmin() {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
       <div className={`dashboard-sidebar ${!isSidebarOpen ? 'closed' : ''}`}>
         <div className="sidebar-header">
           <h2>Admin Panel</h2>
@@ -42,22 +41,20 @@ export function DashboardAdmin() {
         </nav>
       </div>
 
-      {/* Toggle Sidebar Button */}
-      <button 
-        className={`toggle-sidebar ${!isSidebarOpen ? 'closed' : ''}`}
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        <FaBars />
-      </button>
+      <main className={`dashboard-main ${!isSidebarOpen ? 'full' : ''}`}>
+        <button 
+          className="toggle-sidebar"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          {isSidebarOpen ? '←' : '→'}
+        </button>
 
-      {/* Main Content */}
-      <div className={`dashboard-main ${!isSidebarOpen ? 'full' : ''}`}>
         <Routes>
           <Route index element={<DashboardHome />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="facilities" element={<FacilityManagement />} />
         </Routes>
-      </div>
+      </main>
     </div>
   );
 } 
