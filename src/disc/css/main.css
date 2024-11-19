@@ -899,3 +899,15 @@
 .status-badge.pending { background: #fff3e0; color: #e65100; }
 .status-badge.approved { background: #e8f5e9; color: #2e7d32; }
 .status-badge.rejected { background: #fbe9e7; color: #c62828; }
+
+
+/* TOMBOL TAMPIKAN PASSWORD */
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  width: 100%;
+  padding-right: 40px; /* Memberi ruang untuk tombol mata */
+}

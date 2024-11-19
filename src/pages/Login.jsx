@@ -6,6 +6,7 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +22,9 @@ export const Login = () => {
       // Simpan data user ke localStorage
       localStorage.setItem('userRole', role);
       localStorage.setItem('isLoggedIn', 'true');
+      
+      // Tampilkan alert sukses
+      alert('Login berhasil!');
       
       // Redirect berdasarkan role
       switch(role) {
@@ -38,6 +42,8 @@ export const Login = () => {
       }
       
     } catch (err) {
+      // Tampilkan alert error
+      alert('Login gagal: ' + (err.response?.data?.message || 'Email atau password salah!'));
       setError(err.response?.data?.message || 'Email atau password salah!');
     }
   };
@@ -66,13 +72,30 @@ export const Login = () => {
             </div>
             
             <div className="form-group">
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="password-input-container" style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {showPassword ? "🙉" : "🙈"}
+                </button>
+              </div>
             </div>
             
             <button type="submit" className="login-button">
