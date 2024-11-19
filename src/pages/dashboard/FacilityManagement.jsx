@@ -10,7 +10,7 @@ function FacilityManagement() {
   const [formData, setFormData] = useState({
     nama_fasilitas: '',
     kapasitas: '',
-    image: ''
+    images: []
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -40,10 +40,13 @@ function FacilityManagement() {
       formDataToSend.append('nama_fasilitas', formData.nama_fasilitas);
       formDataToSend.append('kapasitas', formData.kapasitas);
       
-      const fileInput = document.querySelector('input[type="file"]');
-      if (fileInput.files[0]) {
-        formDataToSend.append('image', fileInput.files[0]);
-      }
+      // Handle multiple images
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      fileInputs.forEach((input) => {
+        if (input.files[0]) {
+          formDataToSend.append('images', input.files[0]);
+        }
+      });
 
       const config = {
         headers: {
@@ -58,7 +61,7 @@ function FacilityManagement() {
       }
       
       setShowModal(false);
-      setFormData({ nama_fasilitas: '', kapasitas: '', image: '' });
+      setFormData({ nama_fasilitas: '', kapasitas: '', images: [] });
       setEditingId(null);
       fetchFacilities();
     } catch (error) {
@@ -88,7 +91,7 @@ function FacilityManagement() {
     setFormData({
       nama_fasilitas: facility.nama_fasilitas,
       kapasitas: facility.kapasitas,
-      image: facility.image || ''
+      images: facility.images || []
     });
     setEditingId(facility.id);
     setShowModal(true);
@@ -104,7 +107,7 @@ function FacilityManagement() {
         <button 
           className="btn btn-primary"
           onClick={() => {
-            setFormData({ nama_fasilitas: '', kapasitas: '', image: '' });
+            setFormData({ nama_fasilitas: '', kapasitas: '', images: [] });
             setEditingId(null);
             setShowModal(true);
           }}
@@ -126,7 +129,7 @@ function FacilityManagement() {
                 className="btn-close"
                 onClick={() => {
                   setShowModal(false);
-                  setFormData({ nama_fasilitas: '', kapasitas: '', image: '' });
+                  setFormData({ nama_fasilitas: '', kapasitas: '', images: [] });
                   setEditingId(null);
                 }}
               />
@@ -152,39 +155,51 @@ function FacilityManagement() {
                   />
                 </div>
                 <div className="facility-form-group">
-                  <label>Gambar Fasilitas:</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setFormData({...formData, image: reader.result});
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-                  {formData.image && (
-                    <div className="image-preview">
-                      <img 
-                        src={formData.image.startsWith('data:') ? formData.image : `http://localhost:5000/uploads/fasilitas/${formData.image}`}
-                        alt="Preview" 
-                        style={{
-                          maxWidth: '200px',
-                          maxHeight: '150px',
-                          marginTop: '10px',
-                          objectFit: 'cover'
-                        }}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = '/placeholder.jpg';
+                  <label>Gambar Fasilitas (Maksimal 3):</label>
+                  {[1, 2, 3].map((index) => (
+                    <div key={index} className="mb-3">
+                      <label>Gambar {index}:</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData(prev => {
+                                const newImages = [...prev.images];
+                                newImages[index - 1] = reader.result;
+                                return { ...prev, images: newImages };
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
                         }}
                       />
+                      {formData.images[index - 1] && (
+                        <div className="image-preview">
+                          <img 
+                            src={formData.images[index - 1].startsWith('data:') 
+                              ? formData.images[index - 1] 
+                              : `http://localhost:5000/uploads/fasilitas/${formData.images[index - 1]}`
+                            }
+                            alt={`Preview ${index}`} 
+                            style={{
+                              maxWidth: '200px',
+                              maxHeight: '150px',
+                              marginTop: '10px',
+                              objectFit: 'cover'
+                            }}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/placeholder.jpg';
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
                 <div className="facility-modal-footer">
                   <button type="submit" className="btn btn-primary">
@@ -230,7 +245,7 @@ function FacilityManagement() {
                         style={{width: '100px', height: '60px', objectFit: 'cover'}}
                         onError={(e) => {
                           e.target.onerror = null; 
-                          e.target.src = 'placeholder.jpg'; // Gambar default jika error
+                          e.target.src = 'placeholder.jpg';
                         }}
                       />
                     )}

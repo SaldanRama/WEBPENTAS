@@ -19,12 +19,28 @@ export const DetailFasilitas = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     const fetchFacility = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/fasilitas/${id}`);
         setFacility(response.data);
+        
+        // Kumpulkan semua gambar yang tidak null
+        const facilityImages = [
+          response.data.image,
+          response.data.image2,
+          response.data.image3
+        ].filter(img => img !== null);
+        
+        // Ubah path gambar menjadi URL lengkap
+        const imageUrls = facilityImages.map(img => 
+          `http://localhost:5000/uploads/fasilitas/${img}`
+        );
+        
+        setImages(imageUrls);
       } catch (error) {
         console.error('Error fetching facility:', error);
       }
@@ -310,7 +326,16 @@ export const DetailFasilitas = () => {
 
         <div className="row">
             <div className="col-6">
-                <img src="https://sci.unhas.ac.id/wp-content/uploads/2024/05/WhatsApp-Image-2024-05-22-at-12.59.05-1024x771.jpeg" alt="" className="img-fluid" />
+                <img 
+                  src={images[selectedImage]} 
+                  alt="" 
+                  className="img-fluid rounded" 
+                  style={{ 
+                    width: '100%', 
+                    height: '400px', 
+                    objectFit: 'cover' 
+                  }}
+                />
             </div>
 
             <div className="col-5 offset-1">
@@ -339,18 +364,27 @@ export const DetailFasilitas = () => {
                 </table>
             </div>
         </div>
-        <div className="row py-3">
-            <div className="col-2">
-                <img src="https://sci.unhas.ac.id/wp-content/uploads/2024/05/WhatsApp-Image-2024-05-22-at-12.59.05-1024x771.jpeg" alt="" className="img-fluid" />
-            </div>
-            <div className="col-2">
-                <img src="https://sci.unhas.ac.id/wp-content/uploads/2024/05/WhatsApp-Image-2024-05-22-at-12.59.05-1024x771.jpeg" alt="" className="img-fluid" />
-            </div>
-            <div className="col-2">
-                <img src="https://sci.unhas.ac.id/wp-content/uploads/2024/05/WhatsApp-Image-2024-05-22-at-12.59.05-1024x771.jpeg" alt="" className="img-fluid" />
-            </div>
-        </div>
 
+        {/* Thumbnail Images */}
+        <div className="row py-3">
+          {images.map((img, index) => (
+            <div className="col-2" key={index}>
+              <img 
+                src={img} 
+                alt="" 
+                className={`img-fluid rounded cursor-pointer ${selectedImage === index ? 'border border-2 border-primary' : ''}`}
+                style={{ 
+                  width: '100%',
+                  height: '120px',
+                  objectFit: 'cover',
+                  cursor: 'pointer',
+                  opacity: selectedImage === index ? '1' : '0.7'
+                }}
+                onClick={() => setSelectedImage(index)}
+              />
+            </div>
+          ))}
+        </div>
 
         {/* TABLE */}
         
