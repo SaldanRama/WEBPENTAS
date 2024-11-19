@@ -1,10 +1,12 @@
 from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_migrate import Migrate
 from app.config import Config
 import os
 
 db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -20,6 +22,7 @@ def create_app():
     app.config.from_object(Config)
     
     db.init_app(app)
+    migrate.init_app(app, db)
     
     with app.app_context():
         # Import models

@@ -134,3 +134,23 @@ def user_detail(id):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/users', methods=['GET'])
+def get_user():
+    try:
+        email = request.args.get('email')
+        if not email:
+            return jsonify({'error': 'Email parameter required'}), 400
+            
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        return jsonify({
+            'id': user.id,
+            'email': user.email,
+            'role': user.role
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

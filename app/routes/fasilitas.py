@@ -21,6 +21,8 @@ def get_all_fasilitas():
             'id': f.id,
             'nama_fasilitas': f.nama_fasilitas,
             'image': f.image,
+            'image2': f.image2,
+            'image3': f.image3,
             'kapasitas': f.kapasitas,
             'created_at': f.created_at
         } for f in fasilitas])
@@ -36,6 +38,8 @@ def get_fasilitas(id):
             'id': fasilitas.id,
             'nama_fasilitas': fasilitas.nama_fasilitas,
             'image': fasilitas.image,
+            'image2': fasilitas.image2,
+            'image3': fasilitas.image3,
             'kapasitas': fasilitas.kapasitas,
             'created_at': fasilitas.created_at
         })
@@ -46,33 +50,35 @@ def get_fasilitas(id):
 @fasilitas_bp.route('/fasilitas', methods=['POST'])
 def add_fasilitas():
     try:
-        if 'image' not in request.files:
-            return jsonify({'error': 'Gambar harus diupload'}), 400
-            
-        file = request.files['image']
         data = request.form
+        images = request.files.getlist('images')  # Ambil semua file gambar
         
-        if file.filename == '':
-            return jsonify({'error': 'Tidak ada file yang dipilih'}), 400
+        if not images:
+            return jsonify({'error': 'Minimal satu gambar harus diupload'}), 400
             
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            
-            new_fasilitas = Fasilitas(
-                nama_fasilitas=data['nama_fasilitas'],
-                kapasitas=data['kapasitas'],
-                image=filename  # Simpan hanya nama file tanpa path
-            )
-            
-            db.session.add(new_fasilitas)
-            db.session.commit()
-            
-            return jsonify({
-                'message': 'Fasilitas berhasil ditambahkan',
-                'id': new_fasilitas.id
-            }), 201
+        filenames = []
+        for i, file in enumerate(images[:3]):  # Batasi maksimal 3 gambar
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                filenames.append(filename)
+                
+        new_fasilitas = Fasilitas(
+            nama_fasilitas=data['nama_fasilitas'],
+            kapasitas=data['kapasitas'],
+            image=filenames[0] if len(filenames) > 0 else None,
+            image2=filenames[1] if len(filenames) > 1 else None,
+            image3=filenames[2] if len(filenames) > 2 else None
+        )
+        
+        db.session.add(new_fasilitas)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Fasilitas berhasil ditambahkan',
+            'id': new_fasilitas.id
+        }), 201
             
     except Exception as e:
         db.session.rollback()
