@@ -1,4 +1,84 @@
+import { useState } from 'react';
+import axios from 'axios';
+
 export const DetailFasilitas = () => {
+  const [formData, setFormData] = useState({
+    nama_organisasi: '',
+    tanggal_mulai: '',
+    tanggal_selesai: '',
+    waktu_mulai: '',
+    waktu_selesai: '',
+    penanggung_jawab: '',
+    kontak_pj: '',
+    keperluan: '',
+    email: '',
+    surat_peminjaman: null
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      surat_peminjaman: e.target.files[0]
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const formDataToSend = new FormData();
+      
+      // Tambahkan id_user dan id_fasilitas default untuk sementara
+      formDataToSend.append('id_user', '1');      // Nilai default untuk user
+      formDataToSend.append('id_fasilitas', '10'); // Nilai default untuk fasilitas
+      
+      // Append data lainnya
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      const response = await axios.post('http://localhost:5000/peminjaman', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.message) {
+        alert(response.data.message);
+        // Reset form
+        setFormData({
+          nama_organisasi: '',
+          tanggal_mulai: '',
+          tanggal_selesai: '',
+          waktu_mulai: '',
+          waktu_selesai: '',
+          penanggung_jawab: '',
+          kontak_pj: '',
+          keperluan: '',
+          surat_peminjaman: null
+        });
+      }
+
+    } catch (err) {
+      console.error('Error detail:', err.response?.data);
+      setError(err.response?.data?.error || 'Terjadi kesalahan saat mengajukan peminjaman');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
         {/* HEADER DETAIL FASILITAS */}
@@ -46,74 +126,140 @@ export const DetailFasilitas = () => {
             <div className="modal-body">
               <p className="text-center">Ajukan peminjaman fasilitas dengan mengisi formulir berikut secara lengkap</p>
               
-              <form>
+              <form onSubmit={handleSubmit}>
+                {error && <div className="alert alert-danger">{error}</div>}
                 <div className="mb-3">
                   <label className="form-label">Nama Organisasi</label>
-                  <input type="text" className="form-control" placeholder="Nama Organisisi"/>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    name="nama_organisasi"
+                    value={formData.nama_organisasi}
+                    onChange={handleInputChange}
+                    placeholder="Nama Organisasi"
+                    required
+                  />
                 </div>
 
                 <div className="row mb-3">
                   <div className="col-md-6">
-                    <label className="form-label">Tanggal Peminjaman</label>
-                    <input type="date" className="form-control"/>
+                    <label className="form-label">Tanggal Mulai</label>
+                    <input 
+                      type="date" 
+                      className="form-control"
+                      name="tanggal_mulai"
+                      value={formData.tanggal_mulai}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Tanggal Selesai</label>
+                    <input 
+                      type="date" 
+                      className="form-control"
+                      name="tanggal_selesai"
+                      value={formData.tanggal_selesai}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label">Jam Peminjaman</label>
                     <div className="row">
                       <div className="col-5">
                         <input 
                           type="time" 
-                          className="form-control" 
-                          placeholder="Jam Mulai"
+                          className="form-control"
+                          name="waktu_mulai"
+                          value={formData.waktu_mulai}
+                          onChange={handleInputChange}
+                          required
                         />
                       </div>
-                      <div className="col-2 text-center d-flex align-items-center justify-content-center">
+                      <div className="col-2 text-center">
                         <span>-</span>
                       </div>
                       <div className="col-5">
                         <input 
                           type="time" 
-                          className="form-control" 
-                          placeholder="Jam Selesai"
+                          className="form-control"
+                          name="waktu_selesai"
+                          value={formData.waktu_selesai}
+                          onChange={handleInputChange}
+                          required
                         />
                       </div>
                     </div>
-                    <small className="text-muted">Format: 24 jam (WITA)</small>
                   </div>
                 </div>
 
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label">Nama Penanggung Jawab</label>
-                    <input type="text" className="form-control" placeholder="Nama Lengkap"/>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="penanggung_jawab"
+                      value={formData.penanggung_jawab}
+                      onChange={handleInputChange}
+                      placeholder="Nama Lengkap"
+                      required
+                    />
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">Kontak Penanggung Jawab</label>
-                    <input type="text" className="form-control" placeholder="08123456789"/>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="kontak_pj"
+                      value={formData.kontak_pj}
+                      onChange={handleInputChange}
+                      placeholder="08123456789"
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="mb-3">
                   <label className="form-label">Keperluan Peminjaman</label>
-                  <input type="text" className="form-control" placeholder="seminar"/>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    name="keperluan"
+                    value={formData.keperluan}
+                    onChange={handleInputChange}
+                    placeholder="seminar"
+                    required
+                  />
                 </div>
 
                 <div className="mb-3">
                   <label className="form-label">Email</label>
-                  <input type="email" className="form-control" placeholder="organisasi@gmail.com"/>
+                  <input 
+                    type="email" 
+                    className="form-control" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="organisasi@gmail.com"
+                    required
+                  />
                 </div>
 
                 <div className="mb-3">
                   <label className="form-label">Upload Surat Peminjaman</label>
-                  <div className="input-group">
-                    <input 
-                      type="file" 
-                      className="form-control" 
-                      id="uploadSurat"
-                      accept=".pdf,.doc,.docx"
-                    />
-                  </div>
-                  <small className="text-muted">Format file: PDF</small>
+                  <input 
+                    type="file" 
+                    className="form-control"
+                    name="surat_peminjaman"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx"
+                    required
+                  />
                 </div>
 
                 <div className="mb-3 form-check">
@@ -124,7 +270,13 @@ export const DetailFasilitas = () => {
                 </div>
 
                 <div className="text-end">
-                  <button type="submit" className="btn btn-danger">Booking</button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-danger" 
+                    disabled={loading}
+                  >
+                    {loading ? 'Memproses...' : 'Submit'}
+                  </button>
                 </div>
               </form>
             </div>
