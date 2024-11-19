@@ -1,8 +1,23 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 export const HomePage = () => {
+  const [facilities, setFacilities] = useState([]);
 
+  // Fetch data fasilitas
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/fasilitas');
+        setFacilities(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error('Error fetching facilities:', error);
+      }
+    };
 
+    fetchFacilities();
+  }, []);
 
   return (
     <div>
@@ -43,7 +58,7 @@ export const HomePage = () => {
                 </div>     
 
         {/* FASILITAS */}
-            <div className="fasilitas container-fluid">
+            <div className="fasilitas container-fluid py-5" style={{ backgroundColor: '#f8f9fa' }}>
                 <div className="container">
                     
                     <h2 className="text-center py-5 fw-semibold">
@@ -51,30 +66,40 @@ export const HomePage = () => {
                     </h2>
 
                     {/* CARD */}
-                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 justify-content-center">
-                        {[1, 2, 3].map((index) => (
-                          <div className="col" key={index}>
-                            <div className="card h-100">
-                              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR652IUoH2ZkNXQaEpnhs46v-pWMzf0GZD9rg&s" className="card-img-top" alt="..." />
-                              <div className="card-body">
-                                <h5 className="card-title fw-medium">Nama Gedung</h5>
-                                <p className="card-text">00 : 00 - 00 : 00 AM.</p>
-                                <Link to="/detail-fasilitas" className="btn btn-danger">Lihat Detail</Link>
+                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 px-4">
+                        {facilities.map((facility) => (
+                          <div className="col" key={facility.id}>
+                            <div className="card h-100" style={{ maxWidth: '320px', margin: '0 auto' }}>
+                              <div className="card-img-wrapper" style={{ height: '180px' }}>
+                                <img 
+                                  src={`http://localhost:5000/uploads/fasilitas/${facility.image}`}
+                                  className="card-img-top" 
+                                  alt={facility.nama_fasilitas}
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                  }}
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = 'placeholder.jpg';
+                                  }}
+                                />
                               </div>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-
-                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 justify-content-center mt-4">
-                        {[1, 2, 3].map((index) => (
-                          <div className="col" key={index}>
-                            <div className="card h-100">
-                              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR652IUoH2ZkNXQaEpnhs46v-pWMzf0GZD9rg&s" className="card-img-top" alt="..." />
-                              <div className="card-body">
-                                <h5 className="card-title">Nama Gedung</h5>
-                                <p className="card-text">00 : 00 - 00 : 00 AM.</p>
-                                <Link to="/detail-fasilitas" className="btn btn-danger">Lihat Detail</Link>
+                              <div className="card-body d-flex flex-column bg-white">
+                                <h5 className="card-title mb-2">{facility.nama_fasilitas}</h5>
+                                <p className="card-text text-muted small mb-3">00:00 - 00:00 AM</p>
+                                <Link 
+                                  to="/detail-fasilitas" 
+                                  className="btn btn-outline-secondary btn-sm align-self-start"
+                                  style={{
+                                    borderRadius: '8px',
+                                    fontSize: '0.85rem',
+                                    padding: '6px 16px'
+                                  }}
+                                >
+                                  Lihat Detail
+                                </Link>
                               </div>
                             </div>
                           </div>

@@ -911,3 +911,83 @@
   width: 100%;
   padding-right: 40px; /* Memberi ruang untuk tombol mata */
 }
+
+
+/* CARD FASILITAS */
+.fasilitas {
+  background-color: #f8f9fa;
+}
+
+.card {
+  transition: transform 0.2s;
+  border: none;
+  border-radius: 10px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-img-wrapper {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.btn-danger {
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+}
+
+.btn-danger:hover {
+  transform: scale(1.05);
+}
+
+
+/*  CARD FASILITAS */
+.fasilitas .card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fasilitas .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.fasilitas .card-img-wrapper {
+  overflow: hidden;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.fasilitas .card-body {
+  padding: 1.25rem;
+}
+
+.fasilitas .card-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.fasilitas .card-text {
+  color: #7f8c8d !important;
+}
+
+.fasilitas .btn-outline-secondary {
+  border-color: #e0e0e0;
+  color: #ffffff;
+  background-color: #8C1A11;
+}
+
+.fasilitas .btn-outline-secondary:hover {
+  background-color: #f8f9fa;
+  border-color: #666;
+  color: #333;
+}
