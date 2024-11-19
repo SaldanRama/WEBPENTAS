@@ -20,7 +20,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/detail-fasilitas" Component={DetailFasilitas}/>
+        <Route path="/detail-fasilitas/:id" element={<DetailFasilitas />} />
         <Route path="/login" Component={Login}/>
         <Route path="/notifications" Component={NotificationComponents}/>
         <Route path="/dashboard/*" Component={DashboardAdmin}/>

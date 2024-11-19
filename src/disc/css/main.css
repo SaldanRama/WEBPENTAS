@@ -913,40 +913,6 @@
 }
 
 
-/* CARD FASILITAS */
-.fasilitas {
-  background-color: #f8f9fa;
-}
-
-.card {
-  transition: transform 0.2s;
-  border: none;
-  border-radius: 10px;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}
-
-.card-img-wrapper {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.btn-danger {
-  padding: 0.5rem 1.5rem;
-  border-radius: 25px;
-}
-
-.btn-danger:hover {
-  transform: scale(1.05);
-}
-
-
 /*  CARD FASILITAS */
 .fasilitas .card {
   border: none;
@@ -988,6 +954,6 @@
 
 .fasilitas .btn-outline-secondary:hover {
   background-color: #f8f9fa;
-  border-color: #666;
+  border-color: #8C1A11;
   color: #333;
 }

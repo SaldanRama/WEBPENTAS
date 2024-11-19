@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 export const DetailFasilitas = () => {
+  const { id } = useParams();
+  const [facility, setFacility] = useState(null);
   const [formData, setFormData] = useState({
     nama_organisasi: '',
     tanggal_mulai: '',
@@ -16,6 +19,21 @@ export const DetailFasilitas = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchFacility = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/fasilitas/${id}`);
+        setFacility(response.data);
+      } catch (error) {
+        console.error('Error fetching facility:', error);
+      }
+    };
+
+    if (id) {
+      fetchFacility();
+    }
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -90,7 +108,9 @@ export const DetailFasilitas = () => {
             className="detail-image"
           />
           <div className="position-absolute top-50 start-50 translate-middle text-center text-dark">
-            <h1 className="fw-bold mb-3">SCIENCE BUILDING</h1>
+            <h1 className="fw-bold mb-3 text-uppercase">
+              {facility ? facility.nama_fasilitas : 'Loading...'}
+            </h1>
             <button 
               className="btn btn-danger" 
               data-bs-toggle="modal" 

@@ -90,7 +90,7 @@ export const HomePage = () => {
                                 <h5 className="card-title mb-2">{facility.nama_fasilitas}</h5>
                                 <p className="card-text text-muted small mb-3">00:00 - 00:00 AM</p>
                                 <Link 
-                                  to="/detail-fasilitas" 
+                                  to={`/detail-fasilitas/${facility.id}`} 
                                   className="btn btn-outline-secondary btn-sm align-self-start"
                                   style={{
                                     borderRadius: '8px',
