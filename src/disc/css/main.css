@@ -864,7 +864,7 @@
 .stat-icon.users { background: #e3f2fd; color: #1976d2; }
 .stat-icon.facilities { background: #f3e5f5; color: #7b1fa2; }
 .stat-icon.active { background: #e8f5e9; color: #388e3c; }
-.stat-icon.inactive { background: #fbe9e7; color: #d32f2f; }
+.stat-icon.inactive { background: #fff3e0; color: #fc5800; }
 
 .dashboard-grid {
   display: grid;
@@ -1122,4 +1122,25 @@
   gap: 10px;
   align-items: center;
   justify-content: center;
+}
+
+/* dahboard dekan */
+.stat-icon.pending {
+  background: #e3f2fd; 
+  color: #2196f3;
+}
+
+.stat-icon.approved {
+  background: #e8f5e9; 
+  color: #388e3c;
+}
+
+.stat-icon.rejected {
+  background: #fbe9e7; 
+  color: #d32f2f;
+}
+
+.stat-icon.disposisi {
+  background: #fff3e0;
+  color: #fc5800;
 }
