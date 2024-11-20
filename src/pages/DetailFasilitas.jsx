@@ -23,12 +23,17 @@ export const DetailFasilitas = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [images, setImages] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
     const fetchFacility = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/fasilitas/${id}`);
         setFacility(response.data);
+        
+        // Fetch data peminjaman
+        const bookingsResponse = await axios.get(`http://localhost:5000/peminjaman/fasilitas/${id}`);
+        setBookings(bookingsResponse.data);
         
         // Kumpulkan semua gambar yang tidak null
         const facilityImages = [
@@ -44,7 +49,7 @@ export const DetailFasilitas = () => {
         
         setImages(imageUrls);
       } catch (error) {
-        console.error('Error fetching facility:', error);
+        console.error('Error:', error);
       }
     };
 
@@ -402,16 +407,19 @@ export const DetailFasilitas = () => {
                     </tr>
                 </thead>
                 <tbody>
+                  {bookings.length > 0 ? (
+                    bookings.map((booking, index) => (
+                      <tr key={index}>
+                        <td>{new Date(booking.tanggal_mulai).toLocaleDateString('id-ID')}</td>
+                        <td>{booking.waktu_mulai}</td>
+                        <td>{booking.waktu_selesai}</td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
-                        <td>01-01-2024</td>
-                        <td>07 : 00</td>
-                        <td>08 : 00</td>
+                      <td colSpan="3" className="text-center">Belum ada peminjaman</td>
                     </tr>
-                    <tr>
-                        <td>02-01-2024</td>
-                        <td>07 : 00</td>
-                        <td>08 : 00</td>
-                    </tr>
+                  )}
                 </tbody>
                 </table>
             </div>
