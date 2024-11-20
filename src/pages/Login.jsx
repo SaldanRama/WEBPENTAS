@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import '../disc/css/main.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,8 +21,9 @@ export const Login = () => {
 
       const { role } = response.data;
       
-      // Simpan data user ke localStorage
+      // Tambahkan email ke localStorage
       localStorage.setItem('userRole', role);
+      localStorage.setItem('userEmail', email);
       localStorage.setItem('isLoggedIn', 'true');
       
       // Tampilkan alert sukses
@@ -29,16 +32,16 @@ export const Login = () => {
       // Redirect berdasarkan role
       switch(role) {
         case 'admin':
-          window.location.href = '/dashboard';
+          navigate('/dashboard');
           break;
         case 'dekan':
-          window.location.href = '/dashboard-dekan';
+          navigate('/dashboard-dekan');
           break;
         case 'wakil_dekan':
-          window.location.href = '/dashboard-wadek';
+          navigate('/dashboard-wadek');
           break;
         default:
-          window.location.href = '/';
+          navigate('/');
       }
       
     } catch (err) {

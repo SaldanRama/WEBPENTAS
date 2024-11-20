@@ -1,9 +1,32 @@
-import { FaBell } from 'react-icons/fa';
+import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export const NavbarComponents = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const loginStatus = localStorage.getItem('isLoggedIn');
+    const role = localStorage.getItem('userRole');
+    const email = localStorage.getItem('userEmail');
+    setIsLoggedIn(loginStatus === 'true');
+    setUserRole(role || '');
+    setUserEmail(email || '');
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    setIsLoggedIn(false);
+    setUserRole('');
+    setUserEmail('');
+    navigate('/');
+  };
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -48,20 +71,48 @@ export const NavbarComponents = () => {
             </ul>
             </div>
             <div className="d-flex align-items-center gap-3">
-              <Link to="/notifications" className="position-relative">
+              {isLoggedIn && (
+                <Link to="/notifications" className="position-relative">
                   <FaBell size={20} className="text-dark" />
                   <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  3
-                  <span className="visually-hidden">notifikasi baru</span>
+                    3
+                    <span className="visually-hidden">notifikasi baru</span>
                   </span>
-              </Link>
-              <button 
-                type="button" 
-                className="btn btn-outline-danger"
-                onClick={handleLoginClick}
-              >
-                Login
-              </button>
+                </Link>
+              )}
+              {isLoggedIn ? (
+                <div className="dropdown">
+                  <button 
+                    className="btn btn-link text-dark p-0" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                  >
+                    <FaUserCircle size={30} />
+                  </button>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                    <li><span className="dropdown-item-text fw-bold">{userEmail}</span></li>
+                    <li><span className="dropdown-item-text">{userRole}</span></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button 
+                        className="dropdown-item text-danger" 
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                <button 
+                  type="button" 
+                  className="btn btn-outline-danger"
+                  onClick={handleLoginClick}
+                >
+                  Login
+                </button>
+              )}
             </div>
         </div>
         </nav>
