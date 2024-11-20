@@ -52,25 +52,36 @@ def get_fasilitas(id):
 def add_fasilitas():
     try:
         data = request.form
-        images = request.files.getlist('images')  # Ambil semua file gambar
         
-        if not images:
-            return jsonify({'error': 'Minimal satu gambar harus diupload'}), 400
-            
+        # Ambil file gambar dari request
+        image1 = request.files.get('image1')
+        image2 = request.files.get('image2')
+        image3 = request.files.get('image3')
+        
         filenames = []
-        for i, file in enumerate(images[:3]):  # Batasi maksimal 3 gambar
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                filenames.append(filename)
+        
+        # Fungsi untuk generate unique filename
+        def get_unique_filename(original_filename):
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            name, ext = os.path.splitext(original_filename)
+            return f"{name}_{timestamp}{ext}"
+        
+        # Proses setiap gambar
+        for img in [image1, image2, image3]:
+            if img and allowed_file(img.filename):
+                unique_filename = get_unique_filename(secure_filename(img.filename))
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+                img.save(file_path)
+                filenames.append(unique_filename)
+            else:
+                filenames.append(None)
                 
         new_fasilitas = Fasilitas(
             nama_fasilitas=data['nama_fasilitas'],
             kapasitas=data['kapasitas'],
-            image=filenames[0] if len(filenames) > 0 else None,
-            image2=filenames[1] if len(filenames) > 1 else None,
-            image3=filenames[2] if len(filenames) > 2 else None
+            image=filenames[0],
+            image2=filenames[1],
+            image3=filenames[2]
         )
         
         db.session.add(new_fasilitas)
@@ -92,47 +103,47 @@ def update_fasilitas(id):
         fasilitas = Fasilitas.query.get_or_404(id)
         data = request.form
         
-        # Update data non-gambar
-        if 'nama_fasilitas' in data:
-            fasilitas.nama_fasilitas = data['nama_fasilitas']
-        if 'kapasitas' in data:
-            fasilitas.kapasitas = data['kapasitas']
+        # Update data teks
+        fasilitas.nama_fasilitas = data['nama_fasilitas']
+        fasilitas.kapasitas = data['kapasitas']
         
-        # Handle gambar satu per satu
-        for i in range(1, 4):
-            field_name = f'image{i}'
-            if field_name in request.files:
-                file = request.files[field_name]
-                if file and allowed_file(file.filename):
-                    # Buat nama file yang unik dengan timestamp
-                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                    filename = f"{timestamp}_{secure_filename(file.filename)}"
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                    
-                    # Hapus file lama jika ada
-                    old_image = getattr(fasilitas, field_name)
-                    if old_image:
-                        old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_image)
-                        if os.path.exists(old_path):
-                            os.remove(old_path)
-                    
-                    # Simpan file baru
-                    file.save(file_path)
-                    setattr(fasilitas, field_name, filename)
+        # Fungsi untuk generate unique filename
+        def get_unique_filename(original_filename):
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            name, ext = os.path.splitext(original_filename)
+            return f"{name}_{timestamp}{ext}"
+        
+        # Update gambar jika ada
+        for i, field in enumerate(['image1', 'image2', 'image3']):
+            file = request.files.get(field)
+            if file and allowed_file(file.filename):
+                # Hapus file lama jika ada
+                old_image = getattr(fasilitas, f'image{i+1 if i > 0 else ""}')
+                if old_image:
+                    old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_image)
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                
+                # Simpan file baru
+                unique_filename = get_unique_filename(secure_filename(file.filename))
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+                file.save(file_path)
+                
+                # Update database
+                if i == 0:
+                    fasilitas.image = unique_filename
+                elif i == 1:
+                    fasilitas.image2 = unique_filename
+                else:
+                    fasilitas.image3 = unique_filename
         
         db.session.commit()
         
         return jsonify({
             'message': 'Fasilitas berhasil diupdate',
-            'data': {
-                'id': fasilitas.id,
-                'nama_fasilitas': fasilitas.nama_fasilitas,
-                'image': fasilitas.image,
-                'image2': fasilitas.image2,
-                'image3': fasilitas.image3,
-                'kapasitas': fasilitas.kapasitas
-            }
-        })
+            'id': fasilitas.id
+        }), 200
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
