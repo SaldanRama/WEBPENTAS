@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { Modal } from 'bootstrap';
 
 export const DetailFasilitas = () => {
   const { id } = useParams();
@@ -21,6 +22,7 @@ export const DetailFasilitas = () => {
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [images, setImages] = useState([]);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -51,6 +53,33 @@ export const DetailFasilitas = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+          const response = await axios.get(`http://localhost:5000/users`, {
+            params: { email: userEmail }
+          });
+          
+          if (response.data && Array.isArray(response.data)) {
+            const user = response.data.find(u => u.email === userEmail);
+            if (user) {
+              setUserId(user.id);
+            } else {
+              setError('Data user tidak ditemukan');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError('Gagal mengambil data user');
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -71,16 +100,24 @@ export const DetailFasilitas = () => {
     setLoading(true);
     setError('');
 
+    if (!userId) {
+      setError('Silakan login terlebih dahulu');
+      setLoading(false);
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
       
-      // Tambahkan id_user dan id_fasilitas default untuk sementara
-      formDataToSend.append('id_user', '1');      // Nilai default untuk user
-      formDataToSend.append('id_fasilitas', '10'); // Nilai default untuk fasilitas
+      // Pastikan userId adalah number
+      formDataToSend.append('id_user', String(userId));
+      formDataToSend.append('id_fasilitas', id);
       
       // Append data lainnya
       Object.keys(formData).forEach(key => {
-        formDataToSend.append(key, formData[key]);
+        if (key !== 'id_user' && key !== 'id_fasilitas') {
+          formDataToSend.append(key, formData[key]);
+        }
       });
 
       const response = await axios.post('http://localhost:5000/peminjaman', formDataToSend, {
@@ -101,6 +138,7 @@ export const DetailFasilitas = () => {
           penanggung_jawab: '',
           kontak_pj: '',
           keperluan: '',
+          email: '',
           surat_peminjaman: null
         });
       }
@@ -111,6 +149,20 @@ export const DetailFasilitas = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBookingClick = (e) => {
+    e.preventDefault();
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    
+    if (!isLoggedIn) {
+      alert('Silakan login terlebih dahulu untuk melakukan peminjaman fasilitas');
+      window.location.href = '/login';
+      return;
+    }
+    
+    const modal = new Modal(document.getElementById('formModal'));
+    modal.show();
   };
 
   return (
@@ -129,8 +181,7 @@ export const DetailFasilitas = () => {
             </h1>
             <button 
               className="btn btn-danger" 
-              data-bs-toggle="modal" 
-              data-bs-target="#formModal"
+              onClick={handleBookingClick}
             >
               Booking
             </button>
@@ -144,6 +195,7 @@ export const DetailFasilitas = () => {
         id="formModal" 
         tabIndex="-1"
         role="dialog"
+        aria-modal="true"
         aria-labelledby="formModalLabel" 
       >
         <div className="modal-dialog modal-lg">
