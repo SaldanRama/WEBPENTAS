@@ -10,7 +10,8 @@ function FacilityManagement() {
   const [formData, setFormData] = useState({
     nama_fasilitas: '',
     kapasitas: '',
-    images: []
+    images: [],
+    originalFileNames: []
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -32,21 +33,66 @@ function FacilityManagement() {
     fetchFacilities();
   }, []);
 
-  // Handle tambah/edit fasilitas
+  // Handle file input
+  const handleFileChange = (index, file) => {
+    if (file) {
+      console.log(`Processing new file for index ${index}:`, file.name);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => {
+          const newImages = [...prev.images];
+          const newFileNames = [...prev.originalFileNames];
+          newImages[index] = reader.result;
+          newFileNames[index] = file.name;
+          
+          console.log(`Updated state for index ${index}:`, {
+            fileName: file.name,
+            imageDataLength: reader.result.length
+          });
+          
+          return {
+            ...prev,
+            images: newImages,
+            originalFileNames: newFileNames
+          };
+        });
+      };
+      reader.onerror = () => {
+        console.error(`Error reading file at index ${index}`);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('nama_fasilitas', formData.nama_fasilitas);
       formDataToSend.append('kapasitas', formData.kapasitas);
-      
-      // Handle multiple images
-      const fileInputs = document.querySelectorAll('input[type="file"]');
-      fileInputs.forEach((input) => {
-        if (input.files[0]) {
-          formDataToSend.append('images', input.files[0]);
+
+      // Handle gambar
+      for (let i = 0; i < 3; i++) {
+        const image = formData.images[i];
+        const fieldName = `image${i + 1}`;
+        
+        if (image) {
+          if (image.startsWith('data:')) {
+            // Konversi base64 ke blob
+            const response = await fetch(image);
+            const blob = await response.blob();
+            
+            // Gunakan nama file asli dari originalFileNames
+            const fileName = formData.originalFileNames[i] || `image${i + 1}.jpg`;
+            formDataToSend.append(fieldName, blob, fileName);
+          } else {
+            // Gambar existing, kirim nama file saja
+            formDataToSend.append(fieldName, image);
+          }
         }
-      });
+      }
 
       const config = {
         headers: {
@@ -54,19 +100,36 @@ function FacilityManagement() {
         }
       };
 
+      let response;
       if (editingId) {
-        await axios.put(`http://localhost:5000/fasilitas/${editingId}`, formDataToSend, config);
+        response = await axios.put(
+          `http://localhost:5000/fasilitas/${editingId}`,
+          formDataToSend,
+          config
+        );
+        if (response.data.message === 'Fasilitas berhasil diupdate') {
+          setShowModal(false);
+          setFormData({ nama_fasilitas: '', kapasitas: '', images: [], originalFileNames: [] });
+          setEditingId(null);
+          await fetchFacilities();
+          alert('Fasilitas berhasil diupdate!');
+        }
       } else {
-        await axios.post('http://localhost:5000/fasilitas', formDataToSend, config);
+        response = await axios.post(
+          'http://localhost:5000/fasilitas',
+          formDataToSend,
+          config
+        );
+        if (response.data.message === 'Fasilitas berhasil ditambahkan') {
+          setShowModal(false);
+          setFormData({ nama_fasilitas: '', kapasitas: '', images: [], originalFileNames: [] });
+          await fetchFacilities();
+          alert('Fasilitas berhasil ditambahkan!');
+        }
       }
-      
-      setShowModal(false);
-      setFormData({ nama_fasilitas: '', kapasitas: '', images: [] });
-      setEditingId(null);
-      fetchFacilities();
     } catch (error) {
       console.error('Error:', error);
-      setError(error.response?.data?.error || 'Gagal menyimpan fasilitas');
+      alert(error.response?.data?.error || 'Gagal menyimpan fasilitas');
     }
   };
 
@@ -87,11 +150,19 @@ function FacilityManagement() {
 
   // Handle edit fasilitas
   const handleEdit = (facility) => {
-    console.log('Editing facility:', facility);
+    console.log('Data fasilitas sebelum edit:', facility);
+    const imageArray = [
+      facility.image,
+      facility.image2,
+      facility.image3
+    ];
+    console.log('Array gambar yang akan di-set:', imageArray);
+    
     setFormData({
       nama_fasilitas: facility.nama_fasilitas,
       kapasitas: facility.kapasitas,
-      images: facility.images || []
+      images: imageArray,
+      originalFileNames: [facility.image, facility.image2, facility.image3]
     });
     setEditingId(facility.id);
     setShowModal(true);
@@ -107,7 +178,7 @@ function FacilityManagement() {
         <button 
           className="btn btn-primary"
           onClick={() => {
-            setFormData({ nama_fasilitas: '', kapasitas: '', images: [] });
+            setFormData({ nama_fasilitas: '', kapasitas: '', images: [], originalFileNames: [] });
             setEditingId(null);
             setShowModal(true);
           }}
@@ -129,7 +200,7 @@ function FacilityManagement() {
                 className="btn-close"
                 onClick={() => {
                   setShowModal(false);
-                  setFormData({ nama_fasilitas: '', kapasitas: '', images: [] });
+                  setFormData({ nama_fasilitas: '', kapasitas: '', images: [], originalFileNames: [] });
                   setEditingId(null);
                 }}
               />
@@ -162,20 +233,7 @@ function FacilityManagement() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setFormData(prev => {
-                                const newImages = [...prev.images];
-                                newImages[index - 1] = reader.result;
-                                return { ...prev, images: newImages };
-                              });
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
+                        onChange={(e) => handleFileChange(index - 1, e.target.files[0])}
                       />
                       {formData.images[index - 1] && (
                         <div className="image-preview">
@@ -249,21 +307,34 @@ function FacilityManagement() {
                         }}
                       />
                     )}
+                    {(facility.image2 || facility.image3) && (
+                      <span className="badge bg-info ms-2">
+                        +{[facility.image2, facility.image3].filter(img => img !== null).length}
+                      </span>
+                    )}
                   </td>
-                  <td className="action-buttons">
-                    <button 
-                      className="btn btn-warning"
-                      onClick={() => handleEdit(facility)}
-                      style={{ marginRight: '1rem' }}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(facility.id)}
-                    >
-                      Hapus
-                    </button>
+                  <td>
+                    <div className="action-buttons">
+                      <button className="editBtn" onClick={() => handleEdit(facility)}>
+                        <svg height="1em" viewBox="0 0 512 512">
+                          <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"></path>
+                        </svg>
+                      </button>
+                      <button className="bin-button" onClick={() => handleDelete(facility.id)}>
+                        <svg className="bin-top" viewBox="0 0 39 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <line y1="5" x2="39" y2="5" stroke="white" strokeWidth="4"></line>
+                          <line x1="12" y1="1.5" x2="26.0357" y2="1.5" stroke="white" strokeWidth="3"></line>
+                        </svg>
+                        <svg className="bin-bottom" viewBox="0 0 33 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <mask id={`path-1-inside-1_8_19_${facility.id}`} fill="white">
+                            <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"></path>
+                          </mask>
+                          <path d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z" fill="white" mask={`url(#path-1-inside-1_8_19_${facility.id})`}></path>
+                          <path d="M12 6L12 29" stroke="white" strokeWidth="4"></path>
+                          <path d="M21 6V29" stroke="white" strokeWidth="4"></path>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
