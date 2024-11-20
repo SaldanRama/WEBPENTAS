@@ -149,4 +149,20 @@ def update_status(id):
         return jsonify({
             'error': str(e),
             'message': 'Gagal mengupdate status peminjaman'
-        }), 500 
+        }), 500
+
+@peminjaman_bp.route('/peminjaman/fasilitas/<int:id_fasilitas>', methods=['GET'])
+def get_peminjaman_by_fasilitas(id_fasilitas):
+    try:
+        peminjaman = Peminjaman.query.filter_by(
+            id_fasilitas=id_fasilitas,
+            status='disetujui'  # Hanya tampilkan yang sudah disetujui
+        ).all()
+        
+        return jsonify([{
+            'tanggal_mulai': p.tanggal_mulai.strftime('%Y-%m-%d'),
+            'waktu_mulai': p.waktu_mulai.strftime('%H:%M'),
+            'waktu_selesai': p.waktu_selesai.strftime('%H:%M')
+        } for p in peminjaman])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500 

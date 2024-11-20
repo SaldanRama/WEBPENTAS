@@ -135,8 +135,8 @@ def user_detail(id):
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
 
-@auth_bp.route('/users', methods=['GET'])
-def get_user():
+@auth_bp.route('/user-by-email', methods=['GET'])
+def get_user_by_email():
     try:
         email = request.args.get('email')
         if not email:
