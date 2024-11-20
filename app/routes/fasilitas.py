@@ -3,6 +3,7 @@ from app import db
 from app.models.fasilitas import Fasilitas
 from werkzeug.utils import secure_filename
 import os
+from datetime import datetime
 
 fasilitas_bp = Blueprint('fasilitas', __name__)
 
@@ -91,21 +92,47 @@ def update_fasilitas(id):
         fasilitas = Fasilitas.query.get_or_404(id)
         data = request.form
         
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                fasilitas.image = filename
-        
+        # Update data non-gambar
         if 'nama_fasilitas' in data:
             fasilitas.nama_fasilitas = data['nama_fasilitas']
         if 'kapasitas' in data:
             fasilitas.kapasitas = data['kapasitas']
         
+        # Handle gambar satu per satu
+        for i in range(1, 4):
+            field_name = f'image{i}'
+            if field_name in request.files:
+                file = request.files[field_name]
+                if file and allowed_file(file.filename):
+                    # Buat nama file yang unik dengan timestamp
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f"{timestamp}_{secure_filename(file.filename)}"
+                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    
+                    # Hapus file lama jika ada
+                    old_image = getattr(fasilitas, field_name)
+                    if old_image:
+                        old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], old_image)
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    
+                    # Simpan file baru
+                    file.save(file_path)
+                    setattr(fasilitas, field_name, filename)
+        
         db.session.commit()
-        return jsonify({'message': 'Fasilitas berhasil diupdate'})
+        
+        return jsonify({
+            'message': 'Fasilitas berhasil diupdate',
+            'data': {
+                'id': fasilitas.id,
+                'nama_fasilitas': fasilitas.nama_fasilitas,
+                'image': fasilitas.image,
+                'image2': fasilitas.image2,
+                'image3': fasilitas.image3,
+                'kapasitas': fasilitas.kapasitas
+            }
+        })
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
