@@ -1,11 +1,13 @@
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export const NavbarComponents = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [notificationCount, setNotificationCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -17,6 +19,35 @@ export const NavbarComponents = () => {
     setUserRole(role || '');
     setUserEmail(email || '');
   }, []);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+          const response = await axios.get(`http://localhost:5000/peminjaman/user/${userEmail}`);
+          console.log('Response data:', response.data);
+          
+          const activeNotifications = response.data.filter(pinjam => {
+            console.log('Status peminjaman:', pinjam.status);
+            const status = pinjam.status?.toLowerCase() || 'pending';
+            return status === 'pending' || status === 'disposisi';
+          }).length;
+          
+          console.log('Active notifications count:', activeNotifications);
+          setNotificationCount(activeNotifications);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -74,10 +105,12 @@ export const NavbarComponents = () => {
               {isLoggedIn && (
                 <Link to="/notifications" className="position-relative">
                   <FaBell size={20} className="text-dark" />
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    3
-                    <span className="visually-hidden">notifikasi baru</span>
-                  </span>
+                  {notificationCount > 0 && (
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                      {notificationCount}
+                      <span className="visually-hidden">notifikasi baru</span>
+                    </span>
+                  )}
                 </Link>
               )}
               {isLoggedIn ? (

@@ -1,3 +1,10 @@
+/* Pages */
+@import './pages/login.css';
+@import './pages/dashboard/dashboard-common.css';
+@import './pages/dashboard/dekan.css';
+@import './pages/dashboard/wakildekan.css';
+@import './pages/dashboard/admin.css';
+
 *{
     font-family: "Inter", sans-serif;
 }
@@ -48,232 +55,6 @@
   object-position: center;
 }
 
-
-/* LOGIN CSS */
-.login-container {
-  display: flex;
-  height: 100vh;
-}
-
-.login-left {
-  flex: 1;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  background-image: url('https://sippn.menpan.go.id/images/article/large/fakultas-mipa-750x375-1-20240905105353.jpeg'); /* Sesuaikan path gambar */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* Menambahkan overlay gelap agar text lebih terbaca */
-.login-left::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.444); /* Sesuaikan opacity sesuai kebutuhan */
-}
-
-.login-left h1, .login-left p {
-  position: relative;
-  z-index: 2; /* Memastikan text berada di atas overlay */
-  color: rgb(255, 255, 255);
-}
-
-.login-left h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.login-right {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-}
-
-.login-form {
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-}
-
-.login-form h2 {
-  margin-bottom: 0.5rem;
-}
-
-.login-form p {
-  color: #666;
-  margin-bottom: 2rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.login-button {
-  width: 100%;
-  padding: 0.8rem;
-  background-color: #8C1A11;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-}
-
-.login-button:hover {
-  background-color: #600a04;
-}
-
-.forgot-password {
-  text-align: center;
-}
-
-.forgot-password a {
-  color: #8C1A11;
-  text-decoration: none;
-}
-
-.forgot-password a:hover {
-  text-decoration: underline;
-}
-/* END LOGIN */
-
-/* DASHBOARD ADMIN CSS */
-.dashboard-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f3f4f6;
-}
-
-.dashboard-sidebar {
-  background-color: #8C1A11;
-  color: white;
-  width: 280px;
-  position: fixed;
-  height: 100vh;
-  transition: transform 0.3s ease-in-out;
-  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-.dashboard-sidebar.closed {
-  transform: translateX(-280px);
-}
-
-.sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-header h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-}
-
-.sidebar-nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 4rem;
-}
-
-.nav-item {
-  padding: 0.75rem 1.5rem;
-  display: flex;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.nav-item.active {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
-  border-left: 4px solid white;
-}
-
-.nav-item i {
-  margin-right: 0.75rem;
-  width: 20px;
-  text-align: center;
-}
-
-.dashboard-main {
-  flex: 1;
-  margin-left: 280px;
-  padding: 2rem;
-  padding-top: 1.5rem;
-  transition: all 0.3s ease-in-out;
-}
-
-.dashboard-main.full {
-  margin-left: 0;
-}
-
-.toggle-sidebar {
-  position: fixed;
-  bottom: 2rem;
-  z-index: 100;
-  background-color: #8C1A11;
-  color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(140, 26, 17, 0.3);
-  transform: translateX(-50%);
-}
-
-.toggle-sidebar:hover {
-  background-color: #600a04;
-  box-shadow: 0 6px 16px rgba(140, 26, 17, 0.4);
-  transform: translateX(-50%) scale(1.1);
-}
-
-.toggle-sidebar.closed {
-  left: 20px;
-  transform: none;
-}
-
-.toggle-sidebar i {
-  font-size: 1.2rem;
-  transition: transform 0.3s ease;
-}
-
-.toggle-sidebar:hover i {
-  transform: scale(1.2);
-}
 
 .dashboard-card {
   background-color: white;
@@ -1328,6 +1109,10 @@
 
 .disposisi-list {
   margin-top: 1rem;
+}
+
+.disposisi-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .disposisi-item {

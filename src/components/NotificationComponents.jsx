@@ -1,86 +1,103 @@
-import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import '../disc/css/components/NotificationComponents.css';
 
 const NotificationComponents = () => {
-  const notifications = [
-    {
-      id: 1,
-      ruangan: "Aula Fakultas",
-      tanggal: "2024-03-20",
-      status: "disetujui",
-      pesan: "Peminjaman ruangan telah disetujui"
-    },
-    {
-      id: 2, 
-      ruangan: "Lab Komputer",
-      tanggal: "2024-03-21",
-      status: "diproses",
-      pesan: "Peminjaman sedang dalam proses review"
-    },
-    {
-      id: 3,
-      ruangan: "Ruang Meeting",
-      tanggal: "2024-03-22",
-      status: "ditolak",
-      pesan: "Peminjaman ditolak karena jadwal bentrok"
-    }
-  ];
+  const [peminjaman, setPeminjaman] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userEmail = localStorage.getItem('userEmail');
 
-  const getStatusStyle = (status) => {
-    switch(status) {
-      case 'disetujui':
-        return {
-          icon: <FaCheckCircle size={20} />,
-          className: 'alert alert-success',
-          textColor: 'text-success'
-        };
-      case 'diproses':
-        return {
-          icon: <FaClock size={20} />,
-          className: 'alert alert-warning',
-          textColor: 'text-warning'
-        };
-      case 'ditolak':
-        return {
-          icon: <FaTimesCircle size={20} />,
-          className: 'alert alert-danger',
-          textColor: 'text-danger'
-        };
-      default:
-        return {
-          icon: <FaClock size={20} />,
-          className: 'alert alert-secondary',
-          textColor: 'text-secondary'
-        };
+  useEffect(() => {
+    const fetchPeminjaman = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:5000/peminjaman/user/${userEmail}`);
+        const sortedPeminjaman = response.data.sort((a, b) => 
+          new Date(b.created_at) - new Date(a.created_at)
+        );
+        console.log('User peminjaman:', sortedPeminjaman);
+        setPeminjaman(sortedPeminjaman);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isLoggedIn && userEmail) {
+      fetchPeminjaman();
     }
+  }, [isLoggedIn, userEmail]);
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      'pending': 'pending',
+      'disetujui': 'disetujui',
+      'ditolak': 'ditolak',
+      'disposisi': 'disposisi'
+    };
+    return badges[status] || 'pending';
   };
 
+  if (!isLoggedIn) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-warning">
+          Silakan login terlebih dahulu untuk melihat status peminjaman Anda
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mt-4">
-      <h4 className="mb-4 fw-medium">Status Peminjaman</h4>
-      <div className="notifications">
-        {notifications.map((notif) => {
-          const statusStyle = getStatusStyle(notif.status);
-          return (
-            <div key={notif.id} className={`${statusStyle.className} d-flex align-items-center mb-3`} role="alert">
-              <div className="d-flex align-items-center flex-grow-1">
-                <div className={`me-3 ${statusStyle.textColor}`}>
-                  {statusStyle.icon}
+    <div className="notification-container">
+      <h4 className="notification-title">Status Peminjaman</h4>
+      <div className="notifications-wrapper">
+        {loading ? (
+          <div className="notification-alert info">Memuat status peminjaman...</div>
+        ) : error ? (
+          <div className="notification-alert error">{error}</div>
+        ) : peminjaman.length === 0 ? (
+          <div className="notification-alert info">Belum ada peminjaman</div>
+        ) : (
+          peminjaman.map((pinjam) => (
+            <div key={pinjam.id} className="notification-card">
+              <div className="notification-header">
+                <h5 className="facility-name">{pinjam.nama_fasilitas}</h5>
+                <span className={`status-badge ${getStatusBadge(pinjam.status)}`}>
+                  {pinjam.status || 'pending'}
+                </span>
+              </div>
+              <div className="notification-body">
+                <div className="info-row">
+                  <span className="label">Organisasi:</span>
+                  <span className="value">{pinjam.nama_organisasi}</span>
                 </div>
-                <div>
-                  <h6 className="mb-1 fw-bold">Peminjaman {notif.ruangan}</h6>
-                  <p className="mb-1">{notif.pesan}</p>
-                  <small className="text-muted">
-                    <i className="far fa-calendar me-1"></i>
-                    Tanggal: {notif.tanggal}
-                  </small>
+                <div className="info-row">
+                  <span className="label">Tanggal:</span>
+                  <span className="value">{pinjam.tanggal_mulai} - {pinjam.tanggal_selesai}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Waktu:</span>
+                  <span className="value">{pinjam.waktu_mulai} - {pinjam.waktu_selesai}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Keperluan:</span>
+                  <span className="value">{pinjam.keperluan}</span>
                 </div>
               </div>
-              <span className={`badge ${statusStyle.textColor} ms-auto text-capitalize`}>
-                {notif.status}
-              </span>
+              <div className="notification-footer">
+                <small className="timestamp">
+                  Diajukan pada: {new Date(pinjam.created_at).toLocaleString()}
+                </small>
+              </div>
             </div>
-          );
-        })}
+          ))
+        )}
       </div>
     </div>
   );
