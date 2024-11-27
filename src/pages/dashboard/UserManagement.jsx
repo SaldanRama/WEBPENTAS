@@ -11,7 +11,7 @@ function UserManagement() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'mahasiswa' // default role
+    role: '' 
   });
 
   // Fetch users

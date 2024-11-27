@@ -135,15 +135,23 @@ function FacilityManagement() {
 
   // Handle hapus fasilitas
   const handleDelete = async (id) => {
-    console.log('Deleting facility with ID:', id);
     if (window.confirm('Apakah Anda yakin ingin menghapus fasilitas ini?')) {
       try {
         const response = await axios.delete(`http://localhost:5000/fasilitas/${id}`);
-        console.log('Delete response:', response.data);
-        fetchFacilities();
+        
+        if (response.data.message === 'Fasilitas berhasil dihapus') {
+          alert('Fasilitas berhasil dihapus');
+          await fetchFacilities();
+        }
       } catch (error) {
-        console.error('Error details:', error.response?.data);
-        setError('Gagal menghapus fasilitas');
+        console.error('Error saat menghapus:', error);
+        
+        // Cek apakah error karena constraint foreign key
+        if (error.response?.data?.error?.includes('foreign key constraint')) {
+          alert('Fasilitas ini tidak dapat dihapus karena sedang digunakan dalam peminjaman.');
+        } else {
+          alert('Terjadi kesalahan saat menghapus fasilitas. Silakan coba lagi.');
+        }
       }
     }
   };

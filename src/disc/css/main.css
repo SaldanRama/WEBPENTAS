@@ -1144,3 +1144,177 @@
   background: #fff3e0;
   color: #fc5800;
 }
+
+/* Styling untuk Daftar dan Detail Peminjaman */
+.peminjaman-container {
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.peminjaman-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.peminjaman-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.peminjaman-filters select,
+.peminjaman-filters input {
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  min-width: 200px;
+}
+
+.peminjaman-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.peminjaman-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.peminjaman-table th {
+  background: #f8f9fa;
+  padding: 1rem;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.peminjaman-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.peminjaman-table tr:hover {
+  background: #f8f9fa;
+}
+
+/* Detail Peminjaman */
+.detail-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-section h3 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #eee;
+}
+
+.detail-section table {
+  width: 100%;
+}
+
+.detail-section td {
+  padding: 0.75rem 0;
+}
+
+.detail-section td:first-child {
+  width: 200px;
+  color: #666;
+}
+
+.document-preview {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.document-actions {
+  margin-top: 1rem;
+}
+
+.document-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Style untuk button di Daftar Peminjaman */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-buttons button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-buttons .btn-detail {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.action-buttons .btn-detail:hover {
+  background: #bbdefb;
+}
+
+.action-buttons .btn-approve {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.action-buttons .btn-approve:hover {
+  background: #c8e6c9;
+}
+
+.action-buttons .btn-reject {
+  background: #fbe9e7;
+  color: #c62828;
+}
+
+.action-buttons .btn-reject:hover {
+  background: #ffccbc;
+}
+
+.action-buttons .btn-disposisi {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.action-buttons .btn-disposisi:hover {
+  background: #ffe0b2;
+}
+
+.action-buttons .btn-back {
+  background: #f5f5f5;
+  color: #616161;
+}
+
+.action-buttons .btn-back:hover {
+  background: #eeeeee;
+}
+

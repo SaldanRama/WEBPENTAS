@@ -13,7 +13,7 @@ export function DashboardAdmin() {
     <div className="dashboard-container">
       <div className={`dashboard-sidebar ${!isSidebarOpen ? 'closed' : ''}`}>
         <div className="sidebar-header">
-          <h2>Admin Panel</h2>
+          <h2>Dashboard Admin</h2>
         </div>
 
         <nav className="sidebar-nav">
