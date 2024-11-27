@@ -901,6 +901,7 @@
 .status-badge.pending { background: #fff3e0; color: #fc5800; }
 .status-badge.disetujui { background: #e8f5e9; color: #2e7d32; }
 .status-badge.ditolak { background: #fbe9e7; color: #c62828; }
+.status-badge.disposisi { background-color: #fff3e0; color: #f57c00; }
 
 
 /* TOMBOL TAMPIKAN PASSWORD */
@@ -1317,4 +1318,112 @@
 .action-buttons .btn-back:hover {
   background: #eeeeee;
 }
+
+.disposisi-terbaru {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.disposisi-list {
+  margin-top: 1rem;
+}
+
+.disposisi-item {
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.disposisi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.org-name {
+  font-weight: 600;
+}
+
+.disposisi-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.no-data {
+  text-align: center;
+  color: #666;
+  padding: 1rem;
+}
+
+.peminjaman-item {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.peminjaman-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.peminjaman-info h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.peminjaman-details {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.peminjaman-details span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.peminjaman-details i {
+  color: #3498db;
+}
+
+.timestamp {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.timestamp i {
+  color: #95a5a6;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 

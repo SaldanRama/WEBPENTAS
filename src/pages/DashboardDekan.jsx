@@ -14,7 +14,7 @@ export function DashboardDekan() {
         </div>
         
         <nav className="sidebar-nav">
-          <NavLink to="" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+          <NavLink to="" end className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
             <FaTachometerAlt />
             <span>Beranda</span>
           </NavLink>
@@ -65,71 +65,90 @@ function BerandaDekan() {
   });
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [disposisi, setDisposisi] = useState([]);
 
   useEffect(() => {
     fetchStats();
     fetchNotifications();
+    fetchDisposisi();
   }, []);
 
   const fetchStats = async () => {
     try {
-      setLoading(true);
-      const response = await fetch('http://localhost:5000/peminjaman');
-      const data = await response.json();
+      const [peminjamanRes, disposisiRes] = await Promise.all([
+        fetch('http://localhost:5000/peminjaman'),
+        fetch('http://localhost:5000/disposisi')
+      ]);
       
-      // Hitung jumlah masing-masing status
-      const counts = data.reduce((acc, curr) => {
-        acc[curr.status] = (acc[curr.status] || 0) + 1;
-        return acc;
-      }, {});
-
-      setStats({
-        pending: counts.pending || 0,
-        disetujui: counts.disetujui || 0,
-        ditolak: counts.ditolak || 0,
-        disposisi: counts.disposisi || 0
-      });
+      const [peminjamanData, disposisiData] = await Promise.all([
+        peminjamanRes.json(),
+        disposisiRes.json()
+      ]);
+      
+      const stats = {
+        pending: peminjamanData.filter(p => !p.status || p.status === 'pending').length,
+        disetujui: peminjamanData.filter(p => p.status === 'disetujui').length,
+        ditolak: peminjamanData.filter(p => p.status === 'ditolak').length,
+        disposisi: disposisiData.filter(d => d.status_disposisi === 'pending').length
+      };
+      
+      setStats(stats);
     } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error:', error);
     }
   };
 
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const [peminjamanRes, disposisiRes] = await Promise.all([
-        fetch('http://localhost:5000/peminjaman'),
-        fetch('http://localhost:5000/disposisi')
-      ]);
+      const peminjamanRes = await fetch('http://localhost:5000/peminjaman');
+      const peminjamanData = await peminjamanRes.json();
 
-      const [peminjamanData, disposisiData] = await Promise.all([
-        peminjamanRes.json(),
-        disposisiRes.json()
-      ]);
-
-      // Gabungkan dan urutkan notifikasi berdasarkan tanggal
-      const notifications = [
-        ...peminjamanData.map(p => ({
-          id: `peminjaman-${p.id}`,
-          icon: getStatusIcon(p.status),
-          message: `Peminjaman ${p.nama_organisasi} ${getStatusMessage(p.status)}`,
-          timestamp: new Date(p.created_at).toLocaleString()
-        })),
-        ...disposisiData.map(d => ({
-          id: `disposisi-${d.id}`,
-          icon: 'exchange-alt',
-          message: `Disposisi dari ${d.dari} ke ${d.kepada}`,
-          timestamp: new Date(d.created_at).toLocaleString()
-        }))
-      ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      setNotifications(notifications.slice(0, 5)); // Ambil 5 notifikasi terbaru
+      // Urutkan peminjaman berdasarkan created_at (terbaru ke terlama)
+      const sortedPeminjaman = peminjamanData.sort((a, b) => 
+        new Date(a.created_at) - new Date(b.created_at)
+      );
+  
+      const notifications = sortedPeminjaman.map(p => ({
+        id: `peminjaman-${p.id}`,
+        icon: getStatusIcon(p.status),
+        nama_organisasi: p.nama_organisasi,
+        nama_fasilitas: p.nama_fasilitas,
+        status: p.status || 'pending',
+        penanggung_jawab: p.penanggung_jawab,
+        created_at: p.created_at
+      })).reverse();
+      
+      setNotifications(notifications);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDisposisi = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/disposisi');
+      const disposisiData = await response.json();
+      
+      // Urutkan disposisi berdasarkan created_at (terbaru ke terlama)
+      const sortedDisposisi = disposisiData.sort((a, b) => 
+        new Date(b.created_at) - new Date(a.created_at)
+      );
+      
+      // Mengambil detail peminjaman untuk 5 disposisi terbaru
+      const disposisiWithDetails = await Promise.all(
+        sortedDisposisi.slice(0, 5).map(async (item) => {
+          const peminjamanRes = await fetch(`http://localhost:5000/peminjaman/${item.id_peminjaman}`);
+          const peminjamanData = await peminjamanRes.json();
+          return { ...item, peminjaman: peminjamanData };
+        })
+      );
+      
+      setDisposisi(disposisiWithDetails);
+    } catch (error) {
+      console.error('Error fetching disposisi:', error);
     }
   };
 
@@ -140,16 +159,6 @@ function BerandaDekan() {
       case 'ditolak': return 'times-circle';
       case 'disposisi': return 'exchange-alt';
       default: return 'bell';
-    }
-  };
-
-  const getStatusMessage = (status) => {
-    switch(status) {
-      case 'pending': return 'menunggu persetujuan';
-      case 'disetujui': return 'telah disetujui';
-      case 'ditolak': return 'telah ditolak';
-      case 'disposisi': return 'telah didisposisi';
-      default: return '';
     }
   };
 
@@ -212,10 +221,15 @@ function BerandaDekan() {
             {notifications.slice(0, 5).map((notif) => (
               <div key={notif.id} className="peminjaman-item">
                 <div className="peminjaman-info">
-                  <h4>{notif.message}</h4>
-                  <p>{notif.timestamp}</p>
-                  <span className={`status-badge ${notif.icon}`}>
-                    {getStatusMessage(notif.icon)}
+                  <h4 className="fw-bold">{notif.nama_organisasi}</h4>
+                  <div className="peminjaman-details">
+                    <span><i className="fas fa-building"></i> {notif.nama_fasilitas}</span>
+                  </div>
+                  <span className={`status-badge ${notif.status}`}>
+                    {notif.status === 'pending' ? 'Menunggu Persetujuan' :
+                     notif.status === 'disetujui' ? 'Disetujui' :
+                     notif.status === 'ditolak' ? 'Ditolak' :
+                     notif.status === 'disposisi' ? 'Didisposisi' : notif.status}
                   </span>
                 </div>
               </div>
@@ -223,22 +237,44 @@ function BerandaDekan() {
           </div>
         </div>
 
-        <div className="dashboard-card">
+        <div className="dashboard-card disposisi-terbaru">
           <div className="card-header">
             <h2>Disposisi Terbaru</h2>
           </div>
-          <div className="facility-list">
-            {notifications
-              .filter(notif => notif.id.startsWith('disposisi-'))
-              .slice(0, 5)
-              .map((notif) => (
-                <div key={notif.id} className="facility-item">
-                  <div className="facility-info">
-                    <h4>{notif.message}</h4>
-                    <p>{notif.timestamp}</p>
+          <div className="disposisi-list">
+            {disposisi.length > 0 ? (
+              disposisi.map((item) => (
+                <div key={item.id} className="disposisi-item">
+                  <div className="disposisi-header">
+                    <span className="org-name">Disposisi ke {item.kepada.replace('_', ' ')}</span>
+                  </div>
+                  <div className="peminjaman-info">
+                    <span>Peminjaman: </span>
+                    <span>{item.peminjaman?.nama_organisasi} - {item.peminjaman?.nama_fasilitas}</span>
+                  </div>
+                  <div className="disposisi-info">
+                    <div className="time-info">
+                      <span>Waktu Disposisi: </span>
+                      <span>{new Date(new Date(item.created_at).getTime() + (8 * 60 * 60 * 1000)).toLocaleString('id-ID', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZoneName: 'short'
+                      })}</span>
+                    </div>
+                    <span className={`status-badge ${item.status_disposisi}`}>
+                      {item.status_disposisi}
+                    </span>
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              <div className="no-data">Tidak ada disposisi terbaru</div>
+            )}
           </div>
         </div>
       </div>
@@ -264,30 +300,16 @@ function DaftarPeminjaman() {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:5000/peminjaman');
-      let data = await response.json();
-
-      // Filter berdasarkan status
-      if (filter.status !== 'semua') {
-        data = data.filter(p => p.status === filter.status);
-      }
-
-      // Filter berdasarkan tanggal
-      if (filter.tanggal) {
-        data = data.filter(p => p.tanggal_mulai === filter.tanggal);
-      }
-
-      // Filter berdasarkan keyword
-      if (filter.keyword) {
-        const keyword = filter.keyword.toLowerCase();
-        data = data.filter(p => 
-          p.nama_organisasi.toLowerCase().includes(keyword) ||
-          p.penanggung_jawab.toLowerCase().includes(keyword)
-        );
-      }
-
-      setPeminjaman(data);
+      const data = await response.json();
+      
+      // Urutkan peminjaman dari terbaru ke terlama
+      const sortedPeminjaman = data.sort((a, b) => 
+        new Date(a.created_at) - new Date(b.created_at)
+      ).reverse();
+      
+      setPeminjaman(sortedPeminjaman);
     } catch (error) {
-      console.error('Error fetching peminjaman:', error);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
@@ -356,9 +378,10 @@ function DaftarPeminjaman() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Organisasi</th>
+                <th>Nama Organisasi</th>
                 <th>Penanggung Jawab</th>
-                <th>Tanggal & Waktu</th>
+                <th>Fasilitas</th>
+                <th>Waktu</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
@@ -368,6 +391,7 @@ function DaftarPeminjaman() {
                 <tr key={item.id}>
                   <td>{item.nama_organisasi}</td>
                   <td>{item.penanggung_jawab}</td>
+                  <td>{item.nama_fasilitas}</td>
                   <td>
                     {new Date(item.tanggal_mulai).toLocaleDateString()} 
                     <br />
@@ -376,8 +400,8 @@ function DaftarPeminjaman() {
                     </small>
                   </td>
                   <td>
-                    <span className={`status-badge ${item.status}`}>
-                      {item.status}
+                    <span className={`status-badge ${item.status || 'disposisi'}`}>
+                      {item.status || 'Disposisi'}
                     </span>
                   </td>
                   <td>
@@ -448,7 +472,8 @@ function DetailPeminjaman() {
 
   const handleDisposisi = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/disposisi`, {
+      // Buat disposisi
+      const disposisiResponse = await fetch(`http://localhost:5000/disposisi`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -460,9 +485,22 @@ function DetailPeminjaman() {
         })
       });
 
-      if (response.ok) {
-        alert('Berhasil mendisposisikan peminjaman');
-        navigate('/dashboard-dekan/peminjaman');
+      if (disposisiResponse.ok) {
+        // Update status peminjaman menjadi 'disposisi'
+        const statusResponse = await fetch(`http://localhost:5000/peminjaman/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            status: 'disposisi'
+          })
+        });
+
+        if (statusResponse.ok) {
+          alert('Berhasil mendisposisikan peminjaman');
+          navigate('/dashboard-dekan/peminjaman');
+        }
       }
     } catch (error) {
       console.error('Error:', error);
@@ -501,6 +539,10 @@ function DetailPeminjaman() {
             <tr>
               <td>Email</td>
               <td>: {peminjaman.email}</td>
+            </tr>
+            <tr>
+              <td>Fasilitas</td>
+              <td>: {peminjaman.nama_fasilitas}</td>
             </tr>
           </tbody>
         </table>
@@ -576,15 +618,15 @@ function DetailPeminjaman() {
       </div>
 
       <div className="action-buttons">
+        <button onClick={() => navigate('/dashboard-dekan/peminjaman')} className="btn-back">
+          <i className="fas fa-arrow-left"></i>
+          Kembali
+        </button>
         {peminjaman.status === 'pending' && (
           <>
             <button onClick={handleDisposisi} className="btn-disposisi">
               <i className="fas fa-exchange-alt"></i>
               Disposisi ke Wakil Dekan
-            </button>
-            <button onClick={() => navigate('/dashboard-dekan/peminjaman')} className="btn-back">
-              <i className="fas fa-arrow-left"></i>
-              Kembali
             </button>
           </>
         )}
