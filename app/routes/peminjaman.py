@@ -196,4 +196,52 @@ def get_uploaded_file(filename):
         else:
             return jsonify({'error': 'File tidak ditemukan'}), 404
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@peminjaman_bp.route('/peminjaman/user/<int:user_id>', methods=['GET'])
+def get_peminjaman_by_user(user_id):
+    try:
+        peminjaman = Peminjaman.query.filter_by(user_id=user_id).all()
+        
+        result = []
+        for p in peminjaman:
+            fasilitas = Fasilitas.query.get(p.id_fasilitas)
+            if fasilitas:
+                result.append({
+                    'id': p.id,
+                    'nama_fasilitas': fasilitas.nama_fasilitas,
+                    'tanggal_mulai': p.tanggal_mulai.strftime('%Y-%m-%d'),
+                    'tanggal_selesai': p.tanggal_selesai.strftime('%Y-%m-%d'),
+                    'waktu_mulai': p.waktu_mulai.strftime('%H:%M'),
+                    'waktu_selesai': p.waktu_selesai.strftime('%H:%M'),
+                    'status': p.status,
+                    'keperluan': p.keperluan
+                })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@peminjaman_bp.route('/peminjaman/user/<string:email>', methods=['GET'])
+def get_user_peminjaman(email):
+    try:
+        # Ambil semua peminjaman user berdasarkan email
+        user_peminjaman = Peminjaman.query.filter_by(email=email).all()
+        
+        result = []
+        for p in user_peminjaman:
+            fasilitas = Fasilitas.query.get(p.id_fasilitas)
+            result.append({
+                'id': p.id,
+                'nama_fasilitas': fasilitas.nama_fasilitas,
+                'nama_organisasi': p.nama_organisasi,
+                'tanggal_mulai': p.tanggal_mulai.strftime('%Y-%m-%d'),
+                'tanggal_selesai': p.tanggal_selesai.strftime('%Y-%m-%d'),
+                'waktu_mulai': p.waktu_mulai.strftime('%H:%M'),
+                'waktu_selesai': p.waktu_selesai.strftime('%H:%M'),
+                'status': p.status,
+                'keperluan': p.keperluan,
+                'created_at': p.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        return jsonify(result)
+    except Exception as e:
         return jsonify({'error': str(e)}), 500 
