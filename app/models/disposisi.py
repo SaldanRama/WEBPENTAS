@@ -8,7 +8,7 @@ class Disposisi(db.Model):
     id_peminjaman = db.Column(db.Integer, db.ForeignKey('peminjaman.id'), nullable=False)
     dari = db.Column(db.Enum('dekan', 'wakil_dekan'), nullable=False)
     kepada = db.Column(db.Enum('dekan', 'wakil_dekan'), nullable=False)
-    status_disposisi = db.Column(db.Enum('pending', 'approved', 'rejected'), default='pending')
+    status_disposisi = db.Column(db.Enum('pending', 'disetujui', 'ditolak'), default='pending')
     catatan = db.Column(db.Text)
     created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
 
