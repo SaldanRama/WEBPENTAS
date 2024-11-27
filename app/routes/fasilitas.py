@@ -152,10 +152,41 @@ def update_fasilitas(id):
 @fasilitas_bp.route('/fasilitas/<int:id>', methods=['DELETE'])
 def delete_fasilitas(id):
     try:
+        # Cek apakah fasilitas digunakan di tabel peminjaman
+        peminjaman_check = db.session.execute(
+            "SELECT COUNT(*) FROM peminjaman WHERE id_fasilitas = :id",
+            {"id": id}
+        ).scalar()
+
+        if peminjaman_check > 0:
+            return jsonify({
+                'error': 'Fasilitas tidak dapat dihapus karena sedang digunakan dalam peminjaman'
+            }), 400
+
+        # Jika aman, lakukan penghapusan
         fasilitas = Fasilitas.query.get_or_404(id)
+        
+        # Hapus file gambar jika ada
+        if fasilitas.image:
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], fasilitas.image)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        if fasilitas.image2:
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], fasilitas.image2)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        if fasilitas.image3:
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], fasilitas.image3)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
         db.session.delete(fasilitas)
         db.session.commit()
+        
         return jsonify({'message': 'Fasilitas berhasil dihapus'})
     except Exception as e:
         db.session.rollback()
+        # Log error untuk debugging
+        print(f"Error saat menghapus fasilitas: {str(e)}")
+        return jsonify({'error': 'Terjadi kesalahan saat menghapus fasilitas'}), 500 
         return jsonify({'error': str(e)}), 500 

@@ -12,11 +12,10 @@ def create_app():
     app = Flask(__name__)
     CORS(app, resources={
         r"/*": {
-            "origins": "http://localhost:5173",  # URL frontend Anda
-            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "origins": "http://localhost:5173",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True,
-            "expose_headers": ["Content-Disposition"]
+            "supports_credentials": True
         }
     })
     app.config.from_object(Config)
@@ -52,5 +51,8 @@ def create_app():
     @app.route('/uploads/fasilitas/<filename>')
     def uploaded_file(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        
+    # Konfigurasi untuk serving static files
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../uploads')
         
     return app 

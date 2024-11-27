@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from app import db
 from app.models.peminjaman import Peminjaman
@@ -19,24 +19,8 @@ def get_all_peminjaman():
         peminjaman = Peminjaman.query.all()
         return jsonify([{
             'id': p.id,
-            'nama_organisasi': p.nama_organisasi,
-            'tanggal_mulai': p.tanggal_mulai.strftime('%Y-%m-%d'),
-            'tanggal_selesai': p.tanggal_selesai.strftime('%Y-%m-%d'),
-            'waktu_mulai': p.waktu_mulai.strftime('%H:%M'),
-            'waktu_selesai': p.waktu_selesai.strftime('%H:%M'),
-            'penanggung_jawab': p.penanggung_jawab,
-            'status': p.status
-        } for p in peminjaman])
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Get peminjaman by ID
-@peminjaman_bp.route('/peminjaman/<int:id>', methods=['GET'])
-def get_peminjaman(id):
-    try:
-        p = Peminjaman.query.get_or_404(id)
-        return jsonify({
-            'id': p.id,
+            'id_user': p.id_user,
+            'id_fasilitas': p.id_fasilitas,
             'nama_organisasi': p.nama_organisasi,
             'tanggal_mulai': p.tanggal_mulai.strftime('%Y-%m-%d'),
             'tanggal_selesai': p.tanggal_selesai.strftime('%Y-%m-%d'),
@@ -46,7 +30,34 @@ def get_peminjaman(id):
             'kontak_pj': p.kontak_pj,
             'keperluan': p.keperluan,
             'email': p.email,
-            'status': p.status
+            'surat_peminjaman': p.surat_peminjaman,
+            'status': p.status,
+            'created_at': p.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for p in peminjaman])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Get peminjaman by ID
+@peminjaman_bp.route('/peminjaman/<int:id>', methods=['GET'])
+def get_peminjaman_detail(id):
+    try:
+        peminjaman = Peminjaman.query.get_or_404(id)
+        return jsonify({
+            'id': peminjaman.id,
+            'id_user': peminjaman.id_user,
+            'id_fasilitas': peminjaman.id_fasilitas,
+            'nama_organisasi': peminjaman.nama_organisasi,
+            'tanggal_mulai': peminjaman.tanggal_mulai.strftime('%Y-%m-%d'),
+            'tanggal_selesai': peminjaman.tanggal_selesai.strftime('%Y-%m-%d'),
+            'waktu_mulai': peminjaman.waktu_mulai.strftime('%H:%M'),
+            'waktu_selesai': peminjaman.waktu_selesai.strftime('%H:%M'),
+            'penanggung_jawab': peminjaman.penanggung_jawab,
+            'kontak_pj': peminjaman.kontak_pj,
+            'keperluan': peminjaman.keperluan,
+            'email': peminjaman.email,
+            'surat_peminjaman': peminjaman.surat_peminjaman,
+            'status': peminjaman.status,
+            'created_at': peminjaman.created_at.strftime('%Y-%m-%d %H:%M:%S')
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -164,5 +175,18 @@ def get_peminjaman_by_fasilitas(id_fasilitas):
             'waktu_mulai': p.waktu_mulai.strftime('%H:%M'),
             'waktu_selesai': p.waktu_selesai.strftime('%H:%M')
         } for p in peminjaman])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@peminjaman_bp.route('/uploads/<path:filename>', methods=['GET'])
+def get_uploaded_file(filename):
+    try:
+        # Menggunakan path absolut untuk folder uploads
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        upload_path = os.path.join(current_dir, '../../uploads')
+        if os.path.exists(os.path.join(upload_path, filename)):
+            return send_from_directory(upload_path, filename)
+        else:
+            return jsonify({'error': 'File tidak ditemukan'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500 

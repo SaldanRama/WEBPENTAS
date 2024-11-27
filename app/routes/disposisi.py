@@ -28,14 +28,23 @@ def get_all_disposisi():
 def get_disposisi(id):
     try:
         d = Disposisi.query.get_or_404(id)
+        peminjaman = Peminjaman.query.get(d.id_peminjaman)
+        
+        if not peminjaman:
+            return jsonify({'error': 'Peminjaman tidak ditemukan'}), 404
+            
         return jsonify({
             'id': d.id,
             'id_peminjaman': d.id_peminjaman,
             'dari': d.dari,
             'kepada': d.kepada,
-            'status_disposisi': d.status_disposisi,
+            'status': d.status_disposisi,
             'catatan': d.catatan,
-            'created_at': d.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': d.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'nama_organisasi': peminjaman.nama_organisasi,
+            'penanggung_jawab': peminjaman.penanggung_jawab,
+            'kontak_pj': peminjaman.kontak_pj,
+            'catatan_dekan': d.catatan
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -105,4 +114,49 @@ def update_status(id):
         
     except Exception as e:
         db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@disposisi_bp.route('/peminjaman/wadek', methods=['GET'])
+def get_wadek_peminjaman():
+    try:
+        # Ambil disposisi yang ditujukan ke wakil dekan
+        disposisi_wadek = Disposisi.query.filter_by(kepada='wakil_dekan').all()
+        
+        # Ambil data peminjaman terkait
+        result = []
+        for d in disposisi_wadek:
+            peminjaman = Peminjaman.query.get(d.id_peminjaman)
+            if peminjaman:
+                result.append({
+                    'id': d.id,
+                    'nama_organisasi': peminjaman.nama_organisasi,
+                    'penanggung_jawab': peminjaman.penanggung_jawab,
+                    'status': d.status_disposisi,
+                    'created_at': d.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@disposisi_bp.route('/peminjaman/wadek/notifications', methods=['GET'])
+def get_wadek_notifications():
+    try:
+        # Ambil 5 disposisi terbaru untuk wakil dekan
+        recent_disposisi = Disposisi.query.filter_by(kepada='wakil_dekan')\
+            .order_by(Disposisi.created_at.desc())\
+            .limit(5)\
+            .all()
+        
+        result = []
+        for d in recent_disposisi:
+            peminjaman = Peminjaman.query.get(d.id_peminjaman)
+            if peminjaman:
+                result.append({
+                    'id': d.id,
+                    'nama_organisasi': peminjaman.nama_organisasi,
+                    'status': d.status_disposisi,
+                    'created_at': d.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                })
+        return jsonify(result)
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
